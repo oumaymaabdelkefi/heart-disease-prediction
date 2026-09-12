@@ -1,427 +1,903 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dr. Cat — Heart Disease Analytics</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-  :root {
-    --bg: #0d0f14;
-    --bg2: #13161e;
-    --bg3: #1a1e28;
-    --card: #1e2230;
-    --card2: #242838;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.13);
-    --text: #e8eaf0;
-    --text2: #8b90a0;
-    --text3: #555d70;
-    --red: #e55;
-    --red-soft: rgba(229,85,85,0.12);
-    --blue: #4a9eff;
-    --blue-soft: rgba(74,158,255,0.12);
-    --green: #3ecf8e;
-    --green-soft: rgba(62,207,142,0.1);
-    --amber: #f5a623;
-    --amber-soft: rgba(245,166,35,0.1);
-    --teal: #2dd4bf;
-    --accent: #e55;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --font: 'DM Sans', sans-serif;
-    --font-serif: 'DM Serif Display', serif;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dr. Cat — Heart Disease Analytics</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      :root {
+        --bg: #0d0f14;
+        --bg2: #13161e;
+        --bg3: #1a1e28;
+        --card: #1e2230;
+        --card2: #242838;
+        --border: rgba(255, 255, 255, 0.07);
+        --border2: rgba(255, 255, 255, 0.13);
+        --text: #e8eaf0;
+        --text2: #8b90a0;
+        --text3: #555d70;
+        --red: #e55;
+        --red-soft: rgba(229, 85, 85, 0.12);
+        --blue: #4a9eff;
+        --blue-soft: rgba(74, 158, 255, 0.12);
+        --green: #3ecf8e;
+        --green-soft: rgba(62, 207, 142, 0.1);
+        --amber: #f5a623;
+        --amber-soft: rgba(245, 166, 35, 0.1);
+        --teal: #2dd4bf;
+        --accent: #e55;
+        --radius: 14px;
+        --radius-sm: 8px;
+        --font: "DM Sans", sans-serif;
+        --font-serif: "DM Serif Display", serif;
+      }
 
-  /* Light theme overrides — applied when `body` has the class `light-theme` */
-  body.light-theme {
-    --bg: #f7f8fb;
-    --bg2: #ffffff;
-    --bg3: #f2f4f8;
-    --card: #ffffff;
-    --card2: #fbfdff;
-    --border: rgba(15,23,42,0.06);
-    --border2: rgba(15,23,42,0.04);
-    --text: #0f1724;
-    --text2: #4b5563;
-    --text3: #6b7280;
-    --red-soft: rgba(229,85,85,0.08);
-    --blue-soft: rgba(74,158,255,0.08);
-  }
+      /* Light theme overrides — applied when `body` has the class `light-theme` */
+      body.light-theme {
+        --bg: #f7f8fb;
+        --bg2: #ffffff;
+        --bg3: #f2f4f8;
+        --card: #ffffff;
+        --card2: #fbfdff;
+        --border: rgba(15, 23, 42, 0.06);
+        --border2: rgba(15, 23, 42, 0.04);
+        --text: #0f1724;
+        --text2: #4b5563;
+        --text3: #6b7280;
+        --red-soft: rgba(229, 85, 85, 0.08);
+        --blue-soft: rgba(74, 158, 255, 0.08);
+      }
 
-  /* Theme toggle button in sidebar */
-  .theme-toggle {
-    margin: 18px 24px 0 24px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--text2);
-    font-size: 14px;
-    cursor: pointer;
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-    border: 1px solid transparent;
-    transition: all .15s ease;
-  }
-  .theme-toggle:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+      /* Theme toggle button in sidebar */
+      .theme-toggle {
+        margin: 18px 24px 0 24px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--text2);
+        font-size: 14px;
+        cursor: pointer;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+      }
+      .theme-toggle:hover {
+        background: var(--bg3);
+        border-color: var(--border2);
+        color: var(--text);
+      }
 
-  /* Sidebar footer image */
-  .sidebar-footer { margin-top: auto; padding: 18px 24px; text-align: center; }
-  .sidebar-footer img { width: 220px; max-width: 100%; height: auto; border-radius: 0; box-shadow: none; display:block; margin: 0 auto; }
+      /* Sidebar footer image */
+      .sidebar-footer {
+        margin-top: auto;
+        padding: 18px 24px;
+        text-align: center;
+      }
+      .sidebar-footer img {
+        width: 220px;
+        max-width: 100%;
+        height: auto;
+        border-radius: 0;
+        box-shadow: none;
+        display: block;
+        margin: 0 auto;
+      }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.6;
+      }
 
-  /* ─── LAYOUT ─── */
-  .sidebar {
-    position: fixed; left: 0; top: 0; bottom: 0;
-    width: 220px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    padding: 28px 0;
-    z-index: 100;
-  }
-  .logo {
-    padding: 0 24px 28px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
-  .logo-title {
-    font-family: var(--font-serif);
-    font-size: 20px;
-    color: var(--text);
-    letter-spacing: -.3px;
-  }
-  
-  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: .04em; }
+      /* ─── LAYOUT ─── */
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 220px;
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 28px 0;
+        z-index: 100;
+      }
+      .logo {
+        padding: 0 24px 28px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .logo-title {
+        font-family: var(--font-serif);
+        font-size: 20px;
+        color: var(--text);
+        letter-spacing: -0.3px;
+      }
 
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 24px;
-    font-size: 13px; font-weight: 500;
-    color: var(--text2);
-    cursor: pointer;
-    border-left: 2px solid transparent;
-    transition: all .18s;
-    margin: 1px 0;
-  }
-  .nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
-  .nav-item.active { color: var(--text); border-left-color: var(--red); background: rgba(229,85,85,.06); }
-  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+      .logo-sub {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+        letter-spacing: 0.04em;
+      }
 
-  .main { margin-left: 220px; padding: 36px 40px; min-height: 100vh; }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 24px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text2);
+        cursor: pointer;
+        border-left: 2px solid transparent;
+        transition: all 0.18s;
+        margin: 1px 0;
+      }
+      .nav-item:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .nav-item.active {
+        color: var(--text);
+        border-left-color: var(--red);
+        background: rgba(229, 85, 85, 0.06);
+      }
+      .nav-icon {
+        font-size: 16px;
+        width: 18px;
+        text-align: center;
+      }
 
-  /* ─── SECTIONS ─── */
-  .section { display: none; animation: fadeIn .25s ease; }
-  .section.active { display: block; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+      .main {
+        margin-left: 220px;
+        padding: 36px 40px;
+        min-height: 100vh;
+      }
 
-  .page-header { margin-bottom: 32px; }
-  .page-title { font-family: var(--font-serif); font-size: 32px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
-  .page-sub { font-size: 14px; color: var(--text2); }
+      /* ─── SECTIONS ─── */
+      .section {
+        display: none;
+        animation: fadeIn 0.25s ease;
+      }
+      .section.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-  /* ─── UPLOAD ─── */
-  .upload-zone {
-    border: 1.5px dashed var(--border2);
-    border-radius: var(--radius);
-    padding: 60px 40px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-    background: var(--bg2);
-    position: relative;
-  }
-  .upload-zone:hover, .upload-zone.drag { border-color: var(--red); background: rgba(229,85,85,.04); }
-  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { font-size: 48px; margin-bottom: 16px; }
-  .upload-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
-  .upload-hint { font-size: 13px; color: var(--text2); }
-  .upload-btn {
-    display: inline-block; margin-top: 20px;
-    padding: 10px 28px; border-radius: 40px;
-    background: var(--red); color: #fff;
-    font-size: 13px; font-weight: 600;
-    cursor: pointer; border: none;
-    transition: opacity .15s;
-  }
-  .upload-btn:hover { opacity: .85; }
+      .page-header {
+        margin-bottom: 32px;
+      }
+      .page-title {
+        font-family: var(--font-serif);
+        font-size: 32px;
+        font-weight: 400;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .page-sub {
+        font-size: 14px;
+        color: var(--text2);
+      }
 
-  .upload-status {
-    margin-top: 20px; padding: 14px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 13px; display: none;
-  }
-  .upload-status.success { background: var(--green-soft); color: var(--green); border: 1px solid rgba(62,207,142,.2); }
-  .upload-status.error   { background: var(--red-soft); color: var(--red); border: 1px solid rgba(229,85,85,.2); }
+      /* ─── UPLOAD ─── */
+      .upload-zone {
+        border: 1.5px dashed var(--border2);
+        border-radius: var(--radius);
+        padding: 60px 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--bg2);
+        position: relative;
+      }
+      .upload-zone:hover,
+      .upload-zone.drag {
+        border-color: var(--red);
+        background: rgba(229, 85, 85, 0.04);
+      }
+      .upload-zone input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+      .upload-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      .upload-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+      .upload-hint {
+        font-size: 13px;
+        color: var(--text2);
+      }
+      .upload-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 28px;
+        border-radius: 40px;
+        background: var(--red);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.15s;
+      }
+      .upload-btn:hover {
+        opacity: 0.85;
+      }
 
-  .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 40px; }
-  .info-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .info-card h4 { font-size: 13px; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
-  .col-tag {
-    display: inline-block; padding: 3px 10px;
-    background: var(--bg3); border-radius: 4px;
-    font-size: 11px; color: var(--text2);
-    margin: 2px; font-family: monospace;
-  }
-  .col-tag.target { color: var(--red); background: var(--red-soft); }
+      .upload-status {
+        margin-top: 20px;
+        padding: 14px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        display: none;
+      }
+      .upload-status.success {
+        background: var(--green-soft);
+        color: var(--green);
+        border: 1px solid rgba(62, 207, 142, 0.2);
+      }
+      .upload-status.error {
+        background: var(--red-soft);
+        color: var(--red);
+        border: 1px solid rgba(229, 85, 85, 0.2);
+      }
 
-  /* ─── METRICS ─── */
-  .metrics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
-  .metric-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 22px;
-  }
-  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
-  .metric-val { font-size: 30px; font-weight: 600; color: var(--text); line-height: 1; }
-  .metric-sub { font-size: 12px; color: var(--text2); margin-top: 6px; }
-  .metric-bar { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 14px; }
-  .metric-fill { height: 100%; border-radius: 2px; }
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 40px;
+      }
+      .info-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+      }
+      .info-card h4 {
+        font-size: 13px;
+        color: var(--text2);
+        margin-bottom: 12px;
+        font-weight: 500;
+      }
+      .col-tag {
+        display: inline-block;
+        padding: 3px 10px;
+        background: var(--bg3);
+        border-radius: 4px;
+        font-size: 11px;
+        color: var(--text2);
+        margin: 2px;
+        font-family: monospace;
+      }
+      .col-tag.target {
+        color: var(--red);
+        background: var(--red-soft);
+      }
 
-  .charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .charts-row3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 20px; }
+      /* ─── METRICS ─── */
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .metric-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px 22px;
+      }
+      .metric-label {
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+      }
+      .metric-val {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1;
+      }
+      .metric-sub {
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 6px;
+      }
+      .metric-bar {
+        height: 3px;
+        background: var(--bg3);
+        border-radius: 2px;
+        margin-top: 14px;
+      }
+      .metric-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
 
-  .chart-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 22px;
-  }
-  .chart-card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
+      .charts-row {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .charts-row3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+      }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
-  .leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
-  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+      .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px;
+      }
+      .chart-card-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 16px;
+      }
 
-  /* ─── STATS TABLE ─── */
-  .risk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .risk-table th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; text-align: left; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .risk-table td { padding: 11px 0; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
-  .risk-table tr:last-child td { border: none; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
-  .badge-h { background: var(--red-soft); color: var(--red); }
-  .badge-m { background: var(--amber-soft); color: var(--amber); }
-  .badge-l { background: var(--green-soft); color: var(--green); }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+      .leg {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--text2);
+      }
+      .leg-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
 
-  /* ─── PREDICT ─── */
-  .predict-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .predict-form { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
-  .predict-result { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+      /* ─── STATS TABLE ─── */
+      .risk-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .risk-table th {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        text-align: left;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .risk-table td {
+        padding: 11px 0;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        vertical-align: middle;
+      }
+      .risk-table tr:last-child td {
+        border: none;
+      }
+      .badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .badge-h {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .badge-m {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+      .badge-l {
+        background: var(--green-soft);
+        color: var(--green);
+      }
 
-  .form-section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin: 20px 0 14px; }
-  .form-section-title:first-child { margin-top: 0; }
+      /* ─── PREDICT ─── */
+      .predict-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .predict-form {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+      }
+      .predict-result {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+      }
 
-  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-size: 12px; color: var(--text2); font-weight: 500; }
-  .field input, .field select {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    padding: 9px 13px;
-    font-size: 13px;
-    font-family: var(--font);
-    outline: none;
-    transition: border-color .15s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .field input:focus, .field select:focus { border-color: var(--red); }
-  .field select option { background: #1a1e28; }
+      .form-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin: 20px 0 14px;
+      }
+      .form-section-title:first-child {
+        margin-top: 0;
+      }
 
-  .predict-btn {
-    width: 100%; margin-top: 22px; padding: 13px;
-    background: var(--red); color: #fff;
-    border: none; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 600;
-    cursor: pointer; transition: opacity .15s;
-    font-family: var(--font);
-    letter-spacing: .02em;
-  }
-  .predict-btn:hover { opacity: .85; }
-  .predict-btn:disabled { opacity: .5; cursor: not-allowed; }
+      .fields-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .field label {
+        font-size: 12px;
+        color: var(--text2);
+        font-weight: 500;
+      }
+      .field input,
+      .field select {
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        padding: 9px 13px;
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+        transition: border-color 0.15s;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .field input:focus,
+      .field select:focus {
+        border-color: var(--red);
+      }
+      .field select option {
+        background: #1a1e28;
+      }
 
-  /* Result panel */
-  .result-placeholder {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    height: 100%; min-height: 300px;
-    color: var(--text3); text-align: center; gap: 12px;
-  }
-  .result-placeholder-icon { font-size: 48px; opacity: .4; }
+      .predict-btn {
+        width: 100%;
+        margin-top: 22px;
+        padding: 13px;
+        background: var(--red);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.15s;
+        font-family: var(--font);
+        letter-spacing: 0.02em;
+      }
+      .predict-btn:hover {
+        opacity: 0.85;
+      }
+      .predict-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-  .result-panel { display: none; }
-  .result-panel.show { display: block; animation: fadeIn .3s ease; }
+      /* Result panel */
+      .result-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 300px;
+        color: var(--text3);
+        text-align: center;
+        gap: 12px;
+      }
+      .result-placeholder-icon {
+        font-size: 48px;
+        opacity: 0.4;
+      }
 
-  .risk-gauge {
-    text-align: center; padding: 30px 0 24px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 22px;
-  }
-  .risk-number { font-family: var(--font-serif); font-size: 64px; font-weight: 400; line-height: 1; }
-  .risk-label-big { font-size: 16px; font-weight: 600; margin-top: 8px; }
-  .risk-desc { font-size: 12px; color: var(--text2); margin-top: 6px; }
+      .result-panel {
+        display: none;
+      }
+      .result-panel.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
 
-  .risk-bar-wrap { background: var(--bg3); border-radius: 6px; height: 8px; margin: 16px 0; overflow: hidden; }
-  .risk-bar-fill { height: 100%; border-radius: 6px; transition: width .6s ease; }
+      .risk-gauge {
+        text-align: center;
+        padding: 30px 0 24px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 22px;
+      }
+      .risk-number {
+        font-family: var(--font-serif);
+        font-size: 64px;
+        font-weight: 400;
+        line-height: 1;
+      }
+      .risk-label-big {
+        font-size: 16px;
+        font-weight: 600;
+        margin-top: 8px;
+      }
+      .risk-desc {
+        font-size: 12px;
+        color: var(--text2);
+        margin-top: 6px;
+      }
 
-  .feat-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
-  .feat-bar-bg { flex: 1; margin: 0 12px; height: 4px; background: var(--bg3); border-radius: 3px; }
-  .feat-bar { height: 100%; background: var(--blue); border-radius: 3px; }
-  .feat-pct { color: var(--text2); min-width: 38px; text-align: right; }
+      .risk-bar-wrap {
+        background: var(--bg3);
+        border-radius: 6px;
+        height: 8px;
+        margin: 16px 0;
+        overflow: hidden;
+      }
+      .risk-bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.6s ease;
+      }
 
-  /* ─── LOADING ─── */
-  .spinner {
-    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.2);
-    border-top-color: #fff; border-radius: 50%;
-    animation: spin .6s linear infinite; display: inline-block;
-    vertical-align: middle; margin-right: 8px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+      .feat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 12px;
+      }
+      .feat-bar-bg {
+        flex: 1;
+        margin: 0 12px;
+        height: 4px;
+        background: var(--bg3);
+        border-radius: 3px;
+      }
+      .feat-bar {
+        height: 100%;
+        background: var(--blue);
+        border-radius: 3px;
+      }
+      .feat-pct {
+        color: var(--text2);
+        min-width: 38px;
+        text-align: right;
+      }
 
-  /* ─── NO DATA ─── */
-  .no-data {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 80px 20px;
-    color: var(--text3); text-align: center; gap: 14px;
-  }
-  .no-data-icon { font-size: 52px; opacity: .3; }
-  .no-data p { font-size: 14px; max-width: 320px; line-height: 1.6; }
-  .no-data-btn {
-    padding: 10px 24px; border-radius: 40px;
-    background: transparent; border: 1px solid var(--border2);
-    color: var(--text2); font-size: 13px; cursor: pointer;
-    transition: all .15s; font-family: var(--font);
-  }
-  .no-data-btn:hover { border-color: var(--red); color: var(--red); }
+      /* ─── LOADING ─── */
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-  /* ─── ACCURACY BADGE ─── */
-  .acc-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px; border-radius: 20px;
-    background: var(--green-soft); color: var(--green);
-    font-size: 12px; font-weight: 600;
-    border: 1px solid rgba(62,207,142,.2);
-  }
+      /* ─── NO DATA ─── */
+      .no-data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        color: var(--text3);
+        text-align: center;
+        gap: 14px;
+      }
+      .no-data-icon {
+        font-size: 52px;
+        opacity: 0.3;
+      }
+      .no-data p {
+        font-size: 14px;
+        max-width: 320px;
+        line-height: 1.6;
+      }
+      .no-data-btn {
+        padding: 10px 24px;
+        border-radius: 40px;
+        background: transparent;
+        border: 1px solid var(--border2);
+        color: var(--text2);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: var(--font);
+      }
+      .no-data-btn:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
 
+      /* ─── ACCURACY BADGE ─── */
+      .acc-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        background: var(--green-soft);
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid rgba(62, 207, 142, 0.2);
+      }
 
-  /* Access gate */
-  .nav-item.locked { opacity:.35; cursor:not-allowed; }
-  @keyframes homePulse { 0%,100%{opacity:1} 50%{opacity:.25} }
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-  /* article cards */
-  .art-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:10px; }
-  .art-card.rec { border-color:rgba(74,158,255,.3); position:relative; }
-  .art-title { font-size:14px; color:var(--text); line-height:1.55; font-weight:500; }
-  .art-summary { font-size:12px; color:var(--text2); line-height:1.65; flex:1; }
-  .art-footer { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:auto; }
-  .art-journal { background:var(--bg3); color:var(--text2); padding:3px 10px; border-radius:8px; font-weight:600; font-size:11px; }
-  .art-year { color:var(--text3); font-size:12px; }
-  .art-tag { background:var(--bg3); color:var(--text3); font-size:10px; padding:2px 7px; border-radius:99px; }
-  .art-link { margin-left:auto; color:var(--red); font-size:18px; text-decoration:none; }
-  .art-rec-badge { position:absolute; top:14px; right:14px; background:var(--blue-soft); color:var(--blue); font-size:9px; font-weight:700; padding:2px 8px; border-radius:99px; letter-spacing:.08em; }
-</style>
-</head>
-<body>
+      /* Access gate */
+      .nav-item.locked {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      @keyframes homePulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+      /* scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 3px;
+      }
+      /* article cards */
+      .art-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .art-card.rec {
+        border-color: rgba(74, 158, 255, 0.3);
+        position: relative;
+      }
+      .art-title {
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.55;
+        font-weight: 500;
+      }
+      .art-summary {
+        font-size: 12px;
+        color: var(--text2);
+        line-height: 1.65;
+        flex: 1;
+      }
+      .art-footer {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: auto;
+      }
+      .art-journal {
+        background: var(--bg3);
+        color: var(--text2);
+        padding: 3px 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .art-year {
+        color: var(--text3);
+        font-size: 12px;
+      }
+      .art-tag {
+        background: var(--bg3);
+        color: var(--text3);
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 99px;
+      }
+      .art-link {
+        margin-left: auto;
+        color: var(--red);
+        font-size: 18px;
+        text-decoration: none;
+      }
+      .art-rec-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px;
+        letter-spacing: 0.08em;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <aside id="sidebar-root" class="sidebar">
+      <!-- sidebar partial will be loaded here -->
+    </aside>
 
-<!-- SIDEBAR -->
-<aside id="sidebar-root" class="sidebar">
-  <!-- sidebar partial will be loaded here -->
-</aside>
+    <!-- MAIN -->
+    <main class="main">
+      <div id="section-root"><!-- section partials mount here --></div>
+    </main>
 
+    <script>
+      // Loader (synchronous XHR) — loads HTML partials into mount points before the main script runs
+      (function () {
+        function loadSync(url) {
+          try {
+            var req = new XMLHttpRequest();
+            req.open("GET", url, false); // synchronous
+            req.send(null);
+            if (req.status === 200 || req.status === 0) return req.responseText;
+          } catch (e) {}
+          return "";
+        }
+        try {
+          var sidebar = loadSync("partials/sidebar.html");
+          if (sidebar)
+            document.getElementById("sidebar-root").innerHTML = sidebar;
 
-<!-- MAIN -->
-<main class="main">
-  <div id="section-root"><!-- section partials mount here --></div>
-</main>
+          // Load each partial into its own temp element to avoid cross-partial HTML parsing issues
+          // (e.g. a <script> tag in one partial corrupting the next partial's DOM)
+          var root = document.getElementById("section-root");
+          [
+            "home",
+            "upload",
+            "dashboard",
+            "predict",
+            "articles",
+            "doctors",
+          ].forEach(function (name) {
+            var html = loadSync("partials/" + name + ".html");
+            if (!html) return;
+            var tmp = document.createElement("div");
+            tmp.innerHTML = html;
+            while (tmp.firstChild) root.appendChild(tmp.firstChild);
+          });
 
-<script>
-// Loader (synchronous XHR) — loads HTML partials into mount points before the main script runs
-(function(){
-  function loadSync(url){
-    try{
-      var req = new XMLHttpRequest();
-      req.open('GET', url, false); // synchronous
-      req.send(null);
-      if (req.status === 200 || req.status === 0) return req.responseText;
-    } catch(e){}
-    return '';
-  }
-  try{
-    var sidebar = loadSync('partials/sidebar.html');
-    if (sidebar) document.getElementById('sidebar-root').innerHTML = sidebar;
+          // Fix data-src -> src for injected images (partials use data-src)
+          var basePath =
+            window.location.pathname.indexOf("/heart_dashboard/frontend/") !==
+            -1
+              ? ""
+              : "heart_dashboard/frontend/";
+          document
+            .querySelectorAll("#sidebar-root img[data-src]")
+            .forEach(function (img) {
+              try {
+                var ds = img.getAttribute("data-src");
+                var primary = basePath + ds;
+                var alt =
+                  basePath === "" ? "heart_dashboard/frontend/" + ds : ds;
+                img.src = primary;
+                img.onerror = function () {
+                  img.onerror = null;
+                  img.src = alt;
+                };
+              } catch (e) {}
+            });
+        } catch (e) {
+          console.error("Partial load failed", e);
+        }
+      })();
+    </script>
 
-    // Load each partial into its own temp element to avoid cross-partial HTML parsing issues
-    // (e.g. a <script> tag in one partial corrupting the next partial's DOM)
-    var root = document.getElementById('section-root');
-    ['home','upload','dashboard','predict','articles','doctors'].forEach(function(name){
-      var html = loadSync('partials/'+name+'.html');
-      if (!html) return;
-      var tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      while (tmp.firstChild) root.appendChild(tmp.firstChild);
-    });
+    <script>
+      /* Theme handling: apply saved preference (localStorage) and wire toggle */
+      function setTheme(isLight) {
+        if (isLight) {
+          document.body.classList.add("light-theme");
+          document.getElementById("themeToggle").textContent = "☀ Light";
+          document.getElementById("themeToggle").title = "Switch to dark mode";
+        } else {
+          document.body.classList.remove("light-theme");
+          document.getElementById("themeToggle").textContent = "🌙 Night";
+          document.getElementById("themeToggle").title = "Switch to light mode";
+        }
+      }
 
-    // Fix data-src -> src for injected images (partials use data-src)
-    var basePath = window.location.pathname.indexOf('/heart_dashboard/frontend/') !== -1 ? '' : 'heart_dashboard/frontend/';
-    document.querySelectorAll('#sidebar-root img[data-src]').forEach(function(img){
+      function toggleTheme() {
+        const isLight = !document.body.classList.contains("light-theme");
+        setTheme(isLight);
+        try {
+          localStorage.setItem("cardiosense_theme_light", isLight ? "1" : "0");
+        } catch (e) {}
+      }
+
+      // Initialize theme from localStorage
       try {
-        var ds = img.getAttribute('data-src');
-        var primary = basePath + ds;
-        var alt = (basePath === '' ? 'heart_dashboard/frontend/' + ds : ds);
-        img.src = primary;
-        img.onerror = function(){ img.onerror = null; img.src = alt; };
-      } catch(e){}
-    });
-  } catch(e) { console.error('Partial load failed', e); }
-})();
+        const saved = localStorage.getItem("cardiosense_theme_light");
+        setTheme(saved === "1");
+      } catch (e) {}
 
-</script>
+      /* gate is session-only - no auto-restore */
 
-<script>
-/* Theme handling: apply saved preference (localStorage) and wire toggle */
-function setTheme(isLight) {
-  if (isLight) {
-    document.body.classList.add('light-theme');
-    document.getElementById('themeToggle').textContent = '☀ Light';
-    document.getElementById('themeToggle').title = 'Switch to dark mode';
-  } else {
-    document.body.classList.remove('light-theme');
-    document.getElementById('themeToggle').textContent = '🌙 Night';
-    document.getElementById('themeToggle').title = 'Switch to light mode';
-  }
-}
-
-function toggleTheme() {
-  const isLight = !document.body.classList.contains('light-theme');
-  setTheme(isLight);
-  try { localStorage.setItem('cardiosense_theme_light', isLight ? '1' : '0'); } catch(e){}
-}
-
-// Initialize theme from localStorage
-try {
-  const saved = localStorage.getItem('cardiosense_theme_light');
-  setTheme(saved === '1');
-} catch(e){}
-
-/* gate is session-only - no auto-restore */
-
-/* ===================================================================
+      /* ===================================================================
    BACKEND URL CONFIGURATION
    -------------------------------------------------------------------
    When you open this page from your own computer (localhost / 127.0.0.1)
@@ -434,263 +910,505 @@ try {
    e.g.  const BACKEND_URL = 'https://heart-disease-backend.onrender.com';
    (no trailing slash, no /api at the end)
    =================================================================== */
-const BACKEND_URL = 'https://heart-disease-prediction-1r0z.onrender.com';
+      const BACKEND_URL = "https://heart-disease-prediction-1r0z.onrender.com";
 
-const _isLocal = ['localhost', '127.0.0.1', ''].includes(location.hostname);
-const API = (_isLocal ? 'http://localhost:5001' : BACKEND_URL) + '/api';
-let charts = {};
-let statsData = null;
+      const _isLocal = ["localhost", "127.0.0.1", ""].includes(
+        location.hostname,
+      );
+      const API = (_isLocal ? "http://localhost:5001" : BACKEND_URL) + "/api";
+      let charts = {};
+      let statsData = null;
 
-// ─── NAVIGATION ───
-function nav(el) {
-  if (!el) return;
-  if (el.classList.contains('locked')) { navGated(el); return; }
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  el.classList.add('active');
-  const sec = el.dataset.section;
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  const secEl = document.getElementById('sec-'+sec);
-  if (secEl) secEl.classList.add('active');
-  if (sec === 'dashboard' && statsData) renderDashboard(statsData);
-  if (sec === 'doctors' && _doctorsMap) setTimeout(function(){ _doctorsMap.invalidateSize(); }, 50);
-}
+      // ─── NAVIGATION ───
+      function nav(el) {
+        if (!el) return;
+        if (el.classList.contains("locked")) {
+          navGated(el);
+          return;
+        }
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        el.classList.add("active");
+        const sec = el.dataset.section;
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.remove("active"));
+        const secEl = document.getElementById("sec-" + sec);
+        if (secEl) secEl.classList.add("active");
+        if (sec === "dashboard" && statsData) renderDashboard(statsData);
+        if (sec === "doctors" && _doctorsMap)
+          setTimeout(function () {
+            _doctorsMap.invalidateSize();
+          }, 50);
+      }
 
+      // ─── ACCESS GATE ───
+      var accessGranted = false;
+      var dataUploaded = false;
 
-// ─── ACCESS GATE ───
-var accessGranted = false;
-var dataUploaded = false;
+      function unlockDataSections() {
+        ["dashboard", "predict"].forEach(function (sec) {
+          var el = document.querySelector(
+            '.nav-item[data-section="' + sec + '"]',
+          );
+          if (el && el.classList.contains("locked")) {
+            el.classList.remove("locked");
+            var lk = el.querySelector(".lock-icon");
+            if (lk) lk.remove();
+            el.onclick = function () {
+              nav(el);
+            };
+            el.removeAttribute("title");
+          }
+        });
+      }
 
-function unlockDataSections() {
-  ['dashboard','predict'].forEach(function(sec) {
-    var el = document.querySelector('.nav-item[data-section="'+sec+'"]');
-    if (el && el.classList.contains('locked')) {
-      el.classList.remove('locked');
-      var lk = el.querySelector('.lock-icon'); if (lk) lk.remove();
-      el.onclick = function(){ nav(el); };
-      el.removeAttribute('title');
-    }
-  });
-}
+      function grantAccess() {
+        accessGranted = true;
+        // Upload and Articles unlock on consent; Dashboard/Predict need a dataset uploaded first
+        ["upload", "articles", "doctors"].forEach(function (sec) {
+          var el = document.querySelector(
+            '.nav-item[data-section="' + sec + '"]',
+          );
+          if (!el) return;
+          el.classList.remove("locked");
+          var lk = el.querySelector(".lock-icon");
+          if (lk) lk.remove();
+          el.onclick = function () {
+            nav(el);
+          };
+          el.removeAttribute("title");
+        });
+        ["dashboard", "predict"].forEach(function (sec) {
+          var el = document.querySelector(
+            '.nav-item[data-section="' + sec + '"]',
+          );
+          if (el) el.setAttribute("title", "Upload a dataset first to unlock");
+        });
+        var btn = document.getElementById("consentBtn");
+        if (btn) {
+          btn.textContent = "✓ Access granted — upload a dataset to continue";
+          btn.style.background = "var(--green)";
+          btn.disabled = true;
+          btn.style.cursor = "default";
+        }
+      }
 
-function grantAccess() {
-  accessGranted = true;
-  // Upload and Articles unlock on consent; Dashboard/Predict need a dataset uploaded first
-  ['upload','articles','doctors'].forEach(function(sec) {
-    var el = document.querySelector('.nav-item[data-section="'+sec+'"]');
-    if (!el) return;
-    el.classList.remove('locked');
-    var lk = el.querySelector('.lock-icon'); if (lk) lk.remove();
-    el.onclick = function(){ nav(el); };
-    el.removeAttribute('title');
-  });
-  ['dashboard','predict'].forEach(function(sec) {
-    var el = document.querySelector('.nav-item[data-section="'+sec+'"]');
-    if (el) el.setAttribute('title', 'Upload a dataset first to unlock');
-  });
-  var btn = document.getElementById('consentBtn');
-  if (btn) { btn.textContent = '✓ Access granted — upload a dataset to continue'; btn.style.background = 'var(--green)'; btn.disabled = true; btn.style.cursor = 'default'; }
-}
+      function navGated(el) {
+        if (!accessGranted) {
+          var card = document.getElementById("consentCard");
+          if (card) {
+            card.style.boxShadow = "0 0 0 2px var(--red)";
+            setTimeout(function () {
+              card.style.boxShadow = "";
+            }, 1200);
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          document.querySelectorAll(".section").forEach(function (s) {
+            s.classList.remove("active");
+          });
+          var home = document.getElementById("sec-home");
+          if (home) home.classList.add("active");
+          document.querySelectorAll(".nav-item").forEach(function (n) {
+            n.classList.remove("active");
+          });
+          var homeNav = document.querySelector('[data-section="home"]');
+          if (homeNav) homeNav.classList.add("active");
+          return;
+        }
+        // Consented but no dataset yet — send to Upload page
+        var uploadNav = document.querySelector(
+          '.nav-item[data-section="upload"]',
+        );
+        if (uploadNav) nav(uploadNav);
+      }
 
-function navGated(el) {
-  if (!accessGranted) {
-    var card = document.getElementById('consentCard');
-    if (card) {
-      card.style.boxShadow = '0 0 0 2px var(--red)';
-      setTimeout(function(){ card.style.boxShadow = ''; }, 1200);
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
-    var home = document.getElementById('sec-home'); if (home) home.classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-    var homeNav = document.querySelector('[data-section="home"]'); if (homeNav) homeNav.classList.add('active');
-    return;
-  }
-  // Consented but no dataset yet — send to Upload page
-  var uploadNav = document.querySelector('.nav-item[data-section="upload"]');
-  if (uploadNav) nav(uploadNav);
-}
+      // ─── UPLOAD ───
+      const dropZone = document.getElementById("dropZone");
+      if (dropZone) {
+        dropZone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropZone.classList.add("drag");
+        });
+        dropZone.addEventListener("dragleave", () =>
+          dropZone.classList.remove("drag"),
+        );
+        dropZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropZone.classList.remove("drag");
+          if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        });
+      }
 
-// ─── UPLOAD ───
-const dropZone = document.getElementById('dropZone');
-if (dropZone) {
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-}
+      function showStatus(msg, type) {
+        const el = document.getElementById("uploadStatus");
+        el.textContent = msg;
+        el.className = "upload-status " + type;
+        el.style.display = "block";
+      }
 
-function showStatus(msg, type) {
-  const el = document.getElementById('uploadStatus');
-  el.textContent = msg; el.className = 'upload-status ' + type; el.style.display = 'block';
-}
+      async function handleFile(file) {
+        if (!file) return;
+        showStatus("⏳ Uploading and training model...", "success");
+        const fd = new FormData();
+        fd.append("file", file);
+        try {
+          const res = await fetch(API + "/upload", {
+            method: "POST",
+            body: fd,
+          });
+          const data = await res.json();
+          if (data.error) {
+            showStatus("✗ " + data.error, "error");
+            return;
+          }
+          statsData = data.stats;
+          dataUploaded = true;
+          showStatus(
+            `✓ Dataset loaded — ${data.stats.total} patients · Model accuracy: ${data.stats.model_accuracy}%`,
+            "success",
+          );
+          enableSections();
+        } catch (e) {
+          showStatus(
+            "✗ Could not connect to backend. Make sure the Flask server is running on port 5001.",
+            "error",
+          );
+        }
+      }
 
-async function handleFile(file) {
-  if (!file) return;
-  showStatus('⏳ Uploading and training model...', 'success');
-  const fd = new FormData(); fd.append('file', file);
-  try {
-    const res = await fetch(API+'/upload', { method:'POST', body:fd });
-    const data = await res.json();
-    if (data.error) { showStatus('✗ '+data.error, 'error'); return; }
-    statsData = data.stats;
-    dataUploaded = true;
-    showStatus(`✓ Dataset loaded — ${data.stats.total} patients · Model accuracy: ${data.stats.model_accuracy}%`, 'success');
-    enableSections();
-  } catch(e) {
-    showStatus('✗ Could not connect to backend. Make sure the Flask server is running on port 5001.', 'error');
-  }
-}
+      function enableSections() {
+        if (!accessGranted || !dataUploaded) return;
+        if (statsData) {
+          document.getElementById("accBadge").style.display = "flex";
+          document.getElementById("accVal").textContent =
+            statsData.model_accuracy;
+        }
+        document.getElementById("dash-no-data").style.display = "none";
+        document.getElementById("dash-content").style.display = "block";
+        document.getElementById("predict-no-data").style.display = "none";
+        document.getElementById("predict-content").style.display = "block";
+        unlockDataSections();
+      }
 
-function enableSections() {
-  if (!accessGranted || !dataUploaded) return;
-  if (statsData) {
-    document.getElementById('accBadge').style.display = 'flex';
-    document.getElementById('accVal').textContent = statsData.model_accuracy;
-  }
-  document.getElementById('dash-no-data').style.display = 'none';
-  document.getElementById('dash-content').style.display = 'block';
-  document.getElementById('predict-no-data').style.display = 'none';
-  document.getElementById('predict-content').style.display = 'block';
-  unlockDataSections();
-}
+      // ─── DASHBOARD ───
+      function renderDashboard(s) {
+        document.getElementById("dash-sub").textContent =
+          `${s.total} patients · ${s.disease} with heart disease (${s.disease_pct}%)`;
 
-// ─── DASHBOARD ───
-function renderDashboard(s) {
-  document.getElementById('dash-sub').textContent = `${s.total} patients · ${s.disease} with heart disease (${s.disease_pct}%)`;
-
-  // Metrics
-  document.getElementById('metricsGrid').innerHTML = `
-    ${metric('Total patients', s.total, 'rows in dataset', '#4a9eff', 100)}
-    ${metric('Heart disease', s.disease_pct+'%', `${s.disease} of ${s.total} patients`, '#e55', s.disease_pct)}
-    ${metric('Avg cholesterol', s.avg_chol+' mg/dL', 'population average', '#f5a623', Math.min(s.avg_chol/400*100,100).toFixed(0))}
-    ${metric('Max heart rate', s.avg_thalach+' bpm', 'average thalach', '#3ecf8e', Math.min(s.avg_thalach/200*100,100).toFixed(0))}
+        // Metrics
+        document.getElementById("metricsGrid").innerHTML = `
+    ${metric("Total patients", s.total, "rows in dataset", "#4a9eff", 100)}
+    ${metric("Heart disease", s.disease_pct + "%", `${s.disease} of ${s.total} patients`, "#e55", s.disease_pct)}
+    ${metric("Avg cholesterol", s.avg_chol + " mg/dL", "population average", "#f5a623", Math.min((s.avg_chol / 400) * 100, 100).toFixed(0))}
+    ${metric("Max heart rate", s.avg_thalach + " bpm", "average thalach", "#3ecf8e", Math.min((s.avg_thalach / 200) * 100, 100).toFixed(0))}
   `;
 
-  // Charts
-  makeChart('ageChart', 'bar', {
-    labels: s.age_chart.labels,
-    datasets: [
-      { label:'Heart disease', data:s.age_chart.disease, backgroundColor:'#e55', borderRadius:5 },
-      { label:'No disease',    data:s.age_chart.no_disease, backgroundColor:'#4a9eff', borderRadius:5 }
-    ]
-  }, { indexAxis:'x', plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11}}}} });
+        // Charts
+        makeChart(
+          "ageChart",
+          "bar",
+          {
+            labels: s.age_chart.labels,
+            datasets: [
+              {
+                label: "Heart disease",
+                data: s.age_chart.disease,
+                backgroundColor: "#e55",
+                borderRadius: 5,
+              },
+              {
+                label: "No disease",
+                data: s.age_chart.no_disease,
+                backgroundColor: "#4a9eff",
+                borderRadius: 5,
+              },
+            ],
+          },
+          {
+            indexAxis: "x",
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#555d70", font: { size: 11 } },
+              },
+              y: {
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: { color: "#555d70", font: { size: 11 } },
+              },
+            },
+          },
+        );
 
-  makeChart('donutChart', 'doughnut', {
-    labels:['Heart disease','No disease'],
-    datasets:[{ data:[s.disease, s.no_disease], backgroundColor:['#e55','#4a9eff'], borderWidth:0, hoverOffset:8 }]
-  }, { cutout:'60%', plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b90a0',font:{size:11},boxWidth:10,padding:16}}} });
+        makeChart(
+          "donutChart",
+          "doughnut",
+          {
+            labels: ["Heart disease", "No disease"],
+            datasets: [
+              {
+                data: [s.disease, s.no_disease],
+                backgroundColor: ["#e55", "#4a9eff"],
+                borderWidth: 0,
+                hoverOffset: 8,
+              },
+            ],
+          },
+          {
+            cutout: "60%",
+            plugins: {
+              legend: {
+                display: true,
+                position: "bottom",
+                labels: {
+                  color: "#8b90a0",
+                  font: { size: 11 },
+                  boxWidth: 10,
+                  padding: 16,
+                },
+              },
+            },
+          },
+        );
 
-  makeChart('cpChart', 'bar', {
-    labels: s.cp_chart.labels,
-    datasets:[{ data:s.cp_chart.counts, backgroundColor:['#e55','#f5a623','#4a9eff','#3ecf8e'], borderRadius:5 }]
-  }, { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11}}}} });
+        makeChart(
+          "cpChart",
+          "bar",
+          {
+            labels: s.cp_chart.labels,
+            datasets: [
+              {
+                data: s.cp_chart.counts,
+                backgroundColor: ["#e55", "#f5a623", "#4a9eff", "#3ecf8e"],
+                borderRadius: 5,
+              },
+            ],
+          },
+          {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#555d70", font: { size: 10 } },
+              },
+              y: {
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: { color: "#555d70", font: { size: 11 } },
+              },
+            },
+          },
+        );
 
-  makeChart('sexChart', 'bar', {
-    labels:['Male','Female'],
-    datasets:[{ label:'Disease rate %', data:[s.male_disease_rate, s.female_disease_rate], backgroundColor:['#4a9eff','#e55'], borderRadius:6 }]
-  }, { plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toFixed(1)+'%'}}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:11}}},y:{max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11},callback:v=>v+'%'}}} });
+        makeChart(
+          "sexChart",
+          "bar",
+          {
+            labels: ["Male", "Female"],
+            datasets: [
+              {
+                label: "Disease rate %",
+                data: [s.male_disease_rate, s.female_disease_rate],
+                backgroundColor: ["#4a9eff", "#e55"],
+                borderRadius: 6,
+              },
+            ],
+          },
+          {
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (ctx) => ctx.parsed.y.toFixed(1) + "%" },
+              },
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#555d70", font: { size: 11 } },
+              },
+              y: {
+                max: 100,
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: {
+                  color: "#555d70",
+                  font: { size: 11 },
+                  callback: (v) => v + "%",
+                },
+              },
+            },
+          },
+        );
 
-  makeChart('oldpeakChart', 'bar', {
-    labels:['Disease','No Disease'],
-    datasets:[{ data:[s.op_disease, s.op_no_disease], backgroundColor:['#e55','#4a9eff'], borderRadius:6 }]
-  }, { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11}}}} });
+        makeChart(
+          "oldpeakChart",
+          "bar",
+          {
+            labels: ["Disease", "No Disease"],
+            datasets: [
+              {
+                data: [s.op_disease, s.op_no_disease],
+                backgroundColor: ["#e55", "#4a9eff"],
+                borderRadius: 6,
+              },
+            ],
+          },
+          {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#555d70", font: { size: 11 } },
+              },
+              y: {
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: { color: "#555d70", font: { size: 11 } },
+              },
+            },
+          },
+        );
 
-  // Risk table
-  document.getElementById('riskTableBody').innerHTML = `
-    <tr><td>Avg resting blood pressure</td><td>${s.avg_trestbps} mmHg</td><td>Stage 1 hypertension ≥130 mmHg</td><td>${badge(s.avg_trestbps >= 130 ? 'High' : s.avg_trestbps >= 120 ? 'Medium' : 'Low')}</td></tr>
-    <tr><td>Avg cholesterol</td><td>${s.avg_chol} mg/dL</td><td>Borderline high &gt;200 mg/dL</td><td>${badge(s.avg_chol > 240 ? 'High' : s.avg_chol > 200 ? 'Medium' : 'Low')}</td></tr>
-    <tr><td>Female heart disease rate</td><td>${s.female_disease_rate}%</td><td>Compared to male ${s.male_disease_rate}%</td><td>${badge(s.female_disease_rate > 65 ? 'High' : s.female_disease_rate > 45 ? 'Medium' : 'Low')}</td></tr>
-    <tr><td>Fasting blood sugar &gt;120</td><td>${s.fbs_positive} patients</td><td>${((s.fbs_positive/s.total)*100).toFixed(1)}% of dataset — diabetic risk</td><td>${badge(s.fbs_positive/s.total > .15 ? 'Medium' : 'Low')}</td></tr>
+        // Risk table
+        document.getElementById("riskTableBody").innerHTML = `
+    <tr><td>Avg resting blood pressure</td><td>${s.avg_trestbps} mmHg</td><td>Stage 1 hypertension ≥130 mmHg</td><td>${badge(s.avg_trestbps >= 130 ? "High" : s.avg_trestbps >= 120 ? "Medium" : "Low")}</td></tr>
+    <tr><td>Avg cholesterol</td><td>${s.avg_chol} mg/dL</td><td>Borderline high &gt;200 mg/dL</td><td>${badge(s.avg_chol > 240 ? "High" : s.avg_chol > 200 ? "Medium" : "Low")}</td></tr>
+    <tr><td>Female heart disease rate</td><td>${s.female_disease_rate}%</td><td>Compared to male ${s.male_disease_rate}%</td><td>${badge(s.female_disease_rate > 65 ? "High" : s.female_disease_rate > 45 ? "Medium" : "Low")}</td></tr>
+    <tr><td>Fasting blood sugar &gt;120</td><td>${s.fbs_positive} patients</td><td>${((s.fbs_positive / s.total) * 100).toFixed(1)}% of dataset — diabetic risk</td><td>${badge(s.fbs_positive / s.total > 0.15 ? "Medium" : "Low")}</td></tr>
     <tr><td>ST depression — disease group</td><td>${s.op_disease} vs ${s.op_no_disease}</td><td>Lower in disease group (paradox)</td><td><span class="badge badge-m">Medium</span></td></tr>
   `;
-}
+      }
 
-function metric(label, val, sub, color, pct) {
-  return `<div class="metric-card">
+      function metric(label, val, sub, color, pct) {
+        return `<div class="metric-card">
     <div class="metric-label">${label}</div>
     <div class="metric-val">${val}</div>
     <div class="metric-sub">${sub}</div>
     <div class="metric-bar"><div class="metric-fill" style="width:${pct}%;background:${color}"></div></div>
   </div>`;
-}
-
-function badge(level) {
-  const cls = level === 'High' ? 'h' : level === 'Medium' ? 'm' : 'l';
-  return `<span class="badge badge-${cls}">${level}</span>`;
-}
-
-function makeChart(id, type, data, opts={}) {
-  if (charts[id]) { charts[id].destroy(); }
-  const defaults = { responsive:true, maintainAspectRatio:false };
-  charts[id] = new Chart(document.getElementById(id), {
-    type, data,
-    options: { ...defaults, ...opts, plugins: { legend:{display:false}, ...opts.plugins } }
-  });
-}
-
-// ─── PREDICT ───
-const FIELDS = ['age','sex','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','slope','ca','thal'];
-
-async function runPredict() {
-  const btn = document.getElementById('predictBtn');
-  const payload = {};
-  
-  // Define valid ranges for numeric fields
-  const fieldRanges = {
-    'age': { min: 18, max: 120 },
-    'trestbps': { min: 70, max: 250 },
-    'chol': { min: 100, max: 600 },
-    'thalach': { min: 40, max: 250 },
-    'oldpeak': { min: 0, max: 6.2 }
-  };
-  
-  let hasError = false;
-  for (const f of FIELDS) {
-    const el = document.getElementById('f-'+f);
-    if (!el || el.value === '') {
-      if (el) _fieldError(el, 'Required');
-      hasError = true; continue;
-    }
-    const value = parseFloat(el.value);
-    if (fieldRanges[f]) {
-      const range = fieldRanges[f];
-      if (value < range.min || value > range.max) {
-        _fieldError(el, value < range.min ? 'Min: '+range.min : 'Max: '+range.max);
-        hasError = true; continue;
       }
-    }
-    _fieldOk(el);
-    payload[f] = value;
-  }
-  if (hasError) return;
-  
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Analysing...';
-  try {
-    const res = await fetch(API+'/predict', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (data.error) { alert('Error: '+data.error); return; }
-    showResult(data);
-    try { generateAiReport(data, payload); } catch(e) { /* ignore if AI unavailable */ }
-  } catch(e) {
-    alert('Could not connect to backend. Ensure Flask is running on port 5001.');
-  }
-  btn.disabled = false; btn.innerHTML = 'Analyse Patient Risk';
-}
 
-function showResult(data) {
-  document.getElementById('resultPlaceholder').style.display = 'none';
-  const panel = document.getElementById('resultPanel');
-  panel.style.display = 'block'; panel.classList.add('show');
+      function badge(level) {
+        const cls = level === "High" ? "h" : level === "Medium" ? "m" : "l";
+        return `<span class="badge badge-${cls}">${level}</span>`;
+      }
 
-  const isDisease = data.prediction === 1;
-  const color = data.risk_level === 'High' ? '#e55' : data.risk_level === 'Medium' ? '#f5a623' : '#3ecf8e';
+      function makeChart(id, type, data, opts = {}) {
+        if (charts[id]) {
+          charts[id].destroy();
+        }
+        const defaults = { responsive: true, maintainAspectRatio: false };
+        charts[id] = new Chart(document.getElementById(id), {
+          type,
+          data,
+          options: {
+            ...defaults,
+            ...opts,
+            plugins: { legend: { display: false }, ...opts.plugins },
+          },
+        });
+      }
 
-  document.getElementById('riskGauge').innerHTML = `
+      // ─── PREDICT ───
+      const FIELDS = [
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal",
+      ];
+
+      async function runPredict() {
+        const btn = document.getElementById("predictBtn");
+        const payload = {};
+
+        // Define valid ranges for numeric fields
+        const fieldRanges = {
+          age: { min: 18, max: 120 },
+          trestbps: { min: 70, max: 250 },
+          chol: { min: 100, max: 600 },
+          thalach: { min: 40, max: 250 },
+          oldpeak: { min: 0, max: 6.2 },
+        };
+
+        let hasError = false;
+        for (const f of FIELDS) {
+          const el = document.getElementById("f-" + f);
+          if (!el || el.value === "") {
+            if (el) _fieldError(el, "Required");
+            hasError = true;
+            continue;
+          }
+          const value = parseFloat(el.value);
+          if (fieldRanges[f]) {
+            const range = fieldRanges[f];
+            if (value < range.min || value > range.max) {
+              _fieldError(
+                el,
+                value < range.min ? "Min: " + range.min : "Max: " + range.max,
+              );
+              hasError = true;
+              continue;
+            }
+          }
+          _fieldOk(el);
+          payload[f] = value;
+        }
+        if (hasError) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Analysing...';
+        try {
+          const res = await fetch(API + "/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (data.error) {
+            alert("Error: " + data.error);
+            return;
+          }
+          showResult(data);
+          try {
+            generateAiReport(data, payload);
+          } catch (e) {
+            /* ignore if AI unavailable */
+          }
+        } catch (e) {
+          alert(
+            "Could not connect to backend. Ensure Flask is running on port 5001.",
+          );
+        }
+        btn.disabled = false;
+        btn.innerHTML = "Analyse Patient Risk";
+      }
+
+      function showResult(data) {
+        document.getElementById("resultPlaceholder").style.display = "none";
+        const panel = document.getElementById("resultPanel");
+        panel.style.display = "block";
+        panel.classList.add("show");
+
+        const isDisease = data.prediction === 1;
+        const color =
+          data.risk_level === "High"
+            ? "#e55"
+            : data.risk_level === "Medium"
+              ? "#f5a623"
+              : "#3ecf8e";
+
+        document.getElementById("riskGauge").innerHTML = `
     <div class="risk-number" style="color:${color}">${data.risk_pct}%</div>
-    <div class="risk-label-big" style="color:${color}">${data.risk_level} Risk — ${isDisease ? 'Heart Disease Likely' : 'No Disease Detected'}</div>
-    <div class="risk-desc">The model predicts ${isDisease ? 'presence' : 'absence'} of heart disease with ${data.risk_pct}% confidence.</div>
+    <div class="risk-label-big" style="color:${color}">${data.risk_level} Risk — ${isDisease ? "Heart Disease Likely" : "No Disease Detected"}</div>
+    <div class="risk-desc">The model predicts ${isDisease ? "presence" : "absence"} of heart disease with ${data.risk_pct}% confidence.</div>
     <div class="risk-bar-wrap">
       <div class="risk-bar-fill" style="width:${data.risk_pct}%;background:${color}"></div>
     </div>
@@ -700,861 +1418,1333 @@ function showResult(data) {
     </div>
   `;
 
-  const maxImp = Math.max(...data.top_features.map(f=>f.importance));
-  document.getElementById('featImportance').innerHTML = data.top_features.map(f => `
+        const maxImp = Math.max(...data.top_features.map((f) => f.importance));
+        document.getElementById("featImportance").innerHTML = data.top_features
+          .map(
+            (f) => `
     <div class="feat-item">
       <span style="min-width:80px;color:var(--text2)">${f.name}</span>
-      <div class="feat-bar-bg"><div class="feat-bar" style="width:${(f.importance/maxImp*100).toFixed(0)}%"></div></div>
+      <div class="feat-bar-bg"><div class="feat-bar" style="width:${((f.importance / maxImp) * 100).toFixed(0)}%"></div></div>
       <span class="feat-pct">${f.importance}%</span>
     </div>
-  `).join('');
+  `,
+          )
+          .join("");
 
-  // Feed prediction to articles recommender
-  if (typeof window.setArticlePrediction === 'function') {
-    window.setArticlePrediction(data);
-  }
-}
-
-let lastAiReport = '';
-
-async function generateAiReport(data, patientFields) {
-  const card = document.getElementById('aiReportCard');
-  const loading = document.getElementById('aiLoading');
-  const preview = document.getElementById('aiPreview');
-  const previewText = document.getElementById('aiPreviewText');
-  const buttonsContainer = document.getElementById('aiButtonsContainer');
-  const chip = document.getElementById('aiRiskChip');
-
-  if(!card) return;
-  card.style.display = 'block';
-  loading.style.display = 'flex';
-  preview.style.display = 'none';
-  buttonsContainer.style.display = 'none';
-
-  const chipColor = data.risk_level === 'High' ? 'var(--red)' : data.risk_level === 'Medium' ? 'var(--amber)' : 'var(--green)';
-  const chipBg = data.risk_level === 'High' ? 'var(--red-soft)' : data.risk_level === 'Medium' ? 'var(--amber-soft)' : 'var(--green-soft)';
-  chip.style.color = chipColor;
-  chip.style.background = chipBg;
-  chip.textContent = `● ${data.risk_level} Risk`;
-
-  const featNames = { age:'Age', sex:'Sex', cp:'Chest pain type', trestbps:'Resting BP', chol:'Cholesterol',
-    fbs:'Fasting blood sugar', restecg:'Resting ECG', thalach:'Max heart rate', exang:'Exercise angina',
-    oldpeak:'ST depression', slope:'ST slope', ca:'Major vessels', thal:'Thalassemia' };
-
-  const topFeatures = (data.top_features||[]).map(f => `${featNames[f.name] || f.name} (${f.importance}% weight)`).join(', ');
-  const patientSummary = Object.entries(patientFields)
-    .map(([k, v]) => `${featNames[k] || k}: ${v}`).join(', ');
-
-  const prompt = `You are a clinical decision support AI assisting cardiologists. A machine learning model has assessed a patient for heart disease risk.\n\nPatient data: ${patientSummary}\n\nModel result: ${data.risk_level} risk — ${data.risk_pct}% probability of heart disease.\nTop contributing features: ${topFeatures}\n\nWrite a concise clinical report with three short sections:\n1. Clinical Overview: (2-3 sentences summarising the patient profile and prediction)\n2. Key Risk Drivers: (bullet points explaining what each top feature means clinically)\n3. Recommended Actions: (3-4 specific clinical next steps)\n\nBe precise and medically appropriate. Do not use markdown headers — use plain text with the section names followed by a colon.`;
-
-  try {
-    const res = await fetch(API + '/ai-report', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ prompt })
-    });
-    const j = await res.json();
-    const text = j.text || j.error || 'Report unavailable.';
-    lastAiReport = text;
-    loading.style.display = 'none';
-    
-    // Show preview (truncated)
-    const previewLength = 250;
-    const displayText = text.length > previewLength ? text.substring(0, previewLength) + '...' : text;
-    previewText.textContent = displayText;
-    preview.style.display = 'block';
-    buttonsContainer.style.display = 'flex';
-  } catch (e) {
-    loading.style.display = 'none';
-    previewText.textContent = 'Could not generate AI report. Ensure your Groq API key is configured on the server.';
-    preview.style.display = 'block';
-  }
-}
-
-function openAiModal() {
-  if (!lastAiReport) return;
-  const modal = document.getElementById('aiModal');
-  const content = document.getElementById('aiModalContent');
-  content.textContent = lastAiReport;
-  modal.style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
-
-function closeAiModal() {
-  const modal = document.getElementById('aiModal');
-  modal.style.display = 'none';
-  document.body.style.overflow = 'auto';
-}
-
-function copyAiReport() {
-  if (!lastAiReport) return;
-  navigator.clipboard.writeText(lastAiReport);
-  const btn = event.target;
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy', 2000);
-}
-
-function copyAiReportFromModal() {
-  if (!lastAiReport) return;
-  navigator.clipboard.writeText(lastAiReport);
-  const btn = event.target;
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy Report', 2000);
-}
-
-// Close modal when clicking outside
-document.addEventListener('click', function(event) {
-  const modal = document.getElementById('aiModal');
-  if (modal && event.target === modal) {
-    closeAiModal();
-  }
-});
-
-// ─── ARTICLES ───
-var ARTICLES = [
-  {
-    id:'a1',
-    title:'LDL-C Reduction and Atherosclerotic Cardiovascular Events: Updated Systematic Review and Meta-Analysis',
-    journal:'Lancet Cardiology', year:'2024',
-    tags:['chol','prevention','ca'],
-    summary:'Reviews statin and non-statin therapies for cholesterol lowering and their impact on reducing coronary events in high-risk populations.',
-    url:'https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(24)00473-8/fulltext'
-  },
-  {
-    id:'a2',
-    title:'Antihypertensive Therapy and Major Cardiovascular Events: Individual Patient Data Meta-Analysis',
-    journal:'NEJM', year:'2025',
-    tags:['trestbps','prevention','high_risk'],
-    summary:'Demonstrates that blood pressure reduction significantly lowers stroke, MI, and heart failure risk across all baseline BP levels above 130 mmHg.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a3',
-    title:'Exercise-Induced ST Depression: Diagnostic Accuracy for Obstructive Coronary Artery Disease',
-    journal:'J Am Coll Cardiol', year:'2025',
-    tags:['oldpeak','slope','exang','thalach'],
-    summary:'Evaluates the sensitivity and specificity of ST-segment changes during stress testing for detecting haemodynamically significant coronary stenosis.',
-    url:'https://www.jacc.org/'
-  },
-  {
-    id:'a4',
-    title:'Stable Angina and Exercise Limitation: Pathophysiology and Current Treatment Strategies',
-    journal:'Circulation', year:'2025',
-    tags:['cp','exang','thalach','angina'],
-    summary:'Covers the mechanisms of exercise-induced chest pain, triage of angina types, and evidence-based medical and interventional management.',
-    url:'https://www.ahajournals.org/journal/circ'
-  },
-  {
-    id:'a5',
-    title:'Coronary Artery Disease Severity by Angiography and Long-Term Cardiovascular Mortality',
-    journal:'Eur Heart J', year:'2025',
-    tags:['ca','high_risk','cp'],
-    summary:'Large cohort study linking the number of obstructed major vessels to 10-year mortality, informing revascularisation decision thresholds.',
-    url:'https://academic.oup.com/eurheartj'
-  },
-  {
-    id:'a6',
-    title:'Cardiac Complications in Thalassemia: MRI Surveillance, Iron Chelation, and Outcomes',
-    journal:'Blood', year:'2024',
-    tags:['thal','heart_failure','high_risk'],
-    summary:'Longitudinal analysis of cardiac iron loading in thalassaemia patients and efficacy of chelation therapy in preventing cardiomyopathy and heart failure.',
-    url:'https://ashpublications.org/blood'
-  },
-  {
-    id:'a7',
-    title:'Fasting Hyperglycaemia as an Independent Predictor of Cardiovascular Events in Non-Diabetic Adults',
-    journal:'Diabetes Care', year:'2025',
-    tags:['fbs','high_risk','chol'],
-    summary:'Prospective cohort demonstrating that fasting blood sugar above 100 mg/dL, even below the diabetic threshold, independently elevates 10-year cardiac risk.',
-    url:'https://diabetesjournals.org/care'
-  },
-  {
-    id:'a8',
-    title:'Age-Specific Cardiovascular Risk Stratification: Biomarkers, Thresholds, and Clinical Decision Making',
-    journal:'JAMA Cardiology', year:'2025',
-    tags:['age','prevention','restecg'],
-    summary:'Proposes revised risk calculators that account for age-dependent biomarker thresholds, improving prediction accuracy in patients over 55 and under 45.',
-    url:'https://jamanetwork.com/journals/jamacardiology'
-  },
-  {
-    id:'a9',
-    title:'Sex Disparities in Coronary Heart Disease Presentation, Diagnosis, and Outcomes',
-    journal:'Eur Heart J', year:'2025',
-    tags:['sex','cp','prevention'],
-    summary:'Reviews how symptoms, risk factors, and treatment responses differ between men and women, highlighting under-diagnosis of CAD in female patients.',
-    url:'https://academic.oup.com/eurheartj'
-  },
-  {
-    id:'a10',
-    title:'Prevention of Heart Failure in High-Risk Patients: Pharmacological and Lifestyle Strategies',
-    journal:'NEJM', year:'2024',
-    tags:['heart_failure','high_risk','trestbps','chol'],
-    summary:'Comprehensive review of SGLT2 inhibitors, ACE inhibitors, and targeted lifestyle interventions in patients at elevated risk of developing heart failure.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a11',
-    title:'Resting ECG Abnormalities and Risk of Major Adverse Cardiovascular Events in Asymptomatic Adults',
-    journal:'JAMA', year:'2024',
-    tags:['restecg','age','arrhythmia'],
-    summary:'Population-based study linking resting ECG findings — LVH, ST changes, bundle branch blocks — to incident MI and arrhythmia over a 12-year follow-up.',
-    url:'https://jamanetwork.com/journals/jama'
-  },
-  {
-    id:'a12',
-    title:'Supervised Cardiac Rehabilitation: Exercise Capacity, Mortality, and Hospital Readmission',
-    journal:'Lancet', year:'2025',
-    tags:['exang','thalach','heart_failure','prevention'],
-    summary:'Meta-analysis of 63 RCTs showing that structured rehabilitation programmes reduce all-cause mortality by 26% and cardiac readmission by 31%.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a13',
-    title:'Mediterranean and DASH Dietary Patterns and Incident Cardiovascular Disease: A 20-Year Cohort',
-    journal:'NEJM Evidence', year:'2025',
-    tags:['prevention','chol','trestbps','lifestyle'],
-    summary:'Long-term cohort confirming that adherence to Mediterranean or DASH diets reduces CHD incidence by 28–34% independently of medication.',
-    url:'https://evidence.nejm.org/'
-  },
-  {
-    id:'a14',
-    title:'Peak Exercise Heart Rate as a Predictor of Cardiovascular and All-Cause Mortality',
-    journal:'Circulation', year:'2025',
-    tags:['thalach','exang','high_risk'],
-    summary:'Analysis of 85 000 stress tests showing that chronotropic incompetence — failure to reach 85% predicted max heart rate — is a strong independent mortality predictor.',
-    url:'https://www.ahajournals.org/journal/circ'
-  },
-  {
-    id:'a15',
-    title:'Hereditary Cardiac Syndromes: Cascade Genetic Screening and Long-Term Risk Stratification',
-    journal:'Nature Medicine', year:'2024',
-    tags:['thal','ca','genetics','age'],
-    summary:'Demonstrates that cascade screening of first-degree relatives of patients with hereditary cardiac conditions yields a 1-in-4 diagnosis rate and improves outcomes.',
-    url:'https://www.nature.com/nm/'
-  },
-  {
-    id:'a16',
-    title:'SGLT2 Inhibitors and Cardiovascular Outcomes: Evidence Beyond Glycaemic Control',
-    journal:'NEJM', year:'2025',
-    tags:['fbs','heart_failure','prevention'],
-    summary:'Landmark trials confirm SGLT2 inhibitors reduce hospitalisation for heart failure and cardiovascular death in both diabetic and non-diabetic patients with elevated cardiac risk.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a17',
-    title:'Atrial Fibrillation Detection, Stroke Risk, and Anticoagulation: Updated Clinical Practice Guidelines',
-    journal:'JAMA', year:'2025',
-    tags:['restecg','arrhythmia','age'],
-    summary:'Consensus guidelines on ECG-based AF screening in adults over 65, stroke risk stratification using CHA₂DS₂-VASc, and evidence for direct oral anticoagulant therapy.',
-    url:'https://jamanetwork.com/journals/jama'
-  },
-  {
-    id:'a18',
-    title:'Coronary Artery Calcium Scoring for Primary Prevention: Who Benefits Most?',
-    journal:'Lancet', year:'2025',
-    tags:['ca','prevention','chol','age'],
-    summary:'Prospective data showing that CAC scoring reclassifies risk in 25% of intermediate-risk patients and guides statin initiation more accurately than traditional risk calculators.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a19',
-    title:'Hypertrophic Cardiomyopathy: Diagnosis, Sudden Death Risk Stratification, and Emerging Therapies',
-    journal:'NEJM', year:'2024',
-    tags:['thalach','cp','exang','high_risk'],
-    summary:'Comprehensive review of HCM pathophysiology, risk factors for sudden cardiac death, and the efficacy of mavacamten and surgical septal reduction in obstructive disease.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a20',
-    title:'Omega-3 Fatty Acids and Residual Cardiovascular Risk After Statin Therapy',
-    journal:'NEJM Evidence', year:'2025',
-    tags:['chol','prevention','lifestyle'],
-    summary:'Re-analysis of REDUCE-IT and STRENGTH trials clarifying which patient subgroups derive meaningful benefit from high-dose icosapentaenoic acid supplementation.',
-    url:'https://evidence.nejm.org/'
-  },
-  {
-    id:'a21',
-    title:'Smoking Cessation and Rapid Reversal of Cardiovascular Risk: A 10-Year Prospective Analysis',
-    journal:'Lancet', year:'2024',
-    tags:['prevention','high_risk','trestbps'],
-    summary:'Demonstrates that within two years of smoking cessation, cardiovascular event risk falls by 39%, approaching never-smoker levels within a decade regardless of pack-year history.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a22',
-    title:'Exercise Intensity, Volume, and Cardiovascular Mortality: Dose-Response Across 100,000 Adults',
-    journal:'JAMA Cardiology', year:'2025',
-    tags:['thalach','prevention','lifestyle','exang'],
-    summary:'Large prospective cohort establishing optimal exercise thresholds — 150–300 min/week of moderate activity — and showing diminishing returns but no harm at very high volumes.',
-    url:'https://jamanetwork.com/journals/jamacardiology'
-  },
-  {
-    id:'a23',
-    title:'Obstructive Sleep Apnoea, Nocturnal Hypertension, and Incident Cardiovascular Disease',
-    journal:'Circulation', year:'2025',
-    tags:['trestbps','arrhythmia','high_risk','restecg'],
-    summary:'Longitudinal study linking untreated OSA severity to nocturnal blood pressure surges, atrial fibrillation burden, and 40% higher incidence of major cardiac events.',
-    url:'https://www.ahajournals.org/journal/circ'
-  },
-  {
-    id:'a24',
-    title:'Sex-Specific Mechanisms in Ischaemic Heart Disease: Microvascular Disease and MINOCA',
-    journal:'Eur Heart J', year:'2025',
-    tags:['sex','cp','trestbps','high_risk'],
-    summary:'Reviews the pathophysiology of myocardial infarction with non-obstructive coronary arteries (MINOCA), which disproportionately affects women and is frequently misdiagnosed.',
-    url:'https://academic.oup.com/eurheartj'
-  },
-  {
-    id:'a25',
-    title:'Iron Deficiency in Heart Failure: Intravenous Repletion and Quality-of-Life Outcomes',
-    journal:'Eur Heart J', year:'2025',
-    tags:['heart_failure','thal','sex','fbs'],
-    summary:'AFFIRM-AHF follow-up data showing IV ferric carboxymaltose reduces HF hospitalisations by 26% in iron-deficient patients regardless of anaemia status.',
-    url:'https://academic.oup.com/eurheartj'
-  },
-  {
-    id:'a26',
-    title:'Aortic Stenosis Progression and Optimal Timing for Valve Replacement',
-    journal:'J Am Coll Cardiol', year:'2024',
-    tags:['cp','oldpeak','slope','high_risk'],
-    summary:'Natural history study of asymptomatic severe AS demonstrating that early intervention reduces mortality compared to watchful waiting once mean gradient exceeds 40 mmHg.',
-    url:'https://www.jacc.org/'
-  },
-  {
-    id:'a27',
-    title:'Cardiac CT Angiography vs. Functional Stress Testing in Stable Chest Pain: ISCHAEMIA Trial Extension',
-    journal:'NEJM', year:'2025',
-    tags:['ca','cp','exang','thalach','oldpeak'],
-    summary:'Extended follow-up confirming that CTA-guided management identifies more obstructive disease but does not reduce death or MI compared to optimal medical therapy alone.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a28',
-    title:'Polypharmacy in Elderly Patients with Heart Failure: Deprescribing Strategies and Outcomes',
-    journal:'Lancet', year:'2025',
-    tags:['age','heart_failure','prevention'],
-    summary:'Randomised trial of structured deprescribing in HF patients over 75 — reducing pill burden by 30% without worsening outcomes and significantly improving adherence to guideline-directed therapy.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a29',
-    title:'Depression, Psychological Stress, and Incident Coronary Artery Disease: Mechanistic Insights',
-    journal:'JAMA', year:'2024',
-    tags:['prevention','high_risk','sex','age'],
-    summary:'Meta-analysis of 22 cohorts demonstrating that major depression confers a 1.6-fold increase in incident CAD, mediated through HPA axis dysregulation and platelet hyper-reactivity.',
-    url:'https://jamanetwork.com/journals/jama'
-  },
-  {
-    id:'a30',
-    title:'Resistant Hypertension: Prevalence, Mechanisms, and Renal Denervation Evidence',
-    journal:'Circulation', year:'2025',
-    tags:['trestbps','high_risk','ca'],
-    summary:'Review of true versus pseudo-resistant hypertension, the role of aldosterone excess, and updated trial data on catheter-based renal denervation as adjunct therapy.',
-    url:'https://www.ahajournals.org/journal/circ'
-  },
-  {
-    id:'a31',
-    title:'Inherited Arrhythmia Syndromes: Long QT, Brugada, and CPVT — Genetics to Clinical Management',
-    journal:'Nature Medicine', year:'2025',
-    tags:['genetics','arrhythmia','restecg','thal'],
-    summary:'Clinical genomics review covering genotype-phenotype correlations, risk stratification for sudden death, and ICD versus pharmacological management in inherited channelopathies.',
-    url:'https://www.nature.com/nm/'
-  },
-  {
-    id:'a32',
-    title:'Dual Antiplatelet Therapy Duration After PCI: Personalising the Benefit-Risk Trade-off',
-    journal:'NEJM', year:'2025',
-    tags:['ca','high_risk','prevention'],
-    summary:'Individual patient data meta-analysis enabling clinician-level risk scoring to determine optimal DAPT duration (6 vs. 12 vs. 24 months) after percutaneous coronary intervention.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a33',
-    title:'Type 2 Diabetes, Coronary Microvascular Disease, and Diastolic Dysfunction',
-    journal:'Diabetes Care', year:'2025',
-    tags:['fbs','chol','heart_failure','oldpeak'],
-    summary:'Mechanistic study linking chronic hyperglycaemia to coronary microvascular dysfunction, impaired myocardial perfusion reserve, and early diastolic heart failure with preserved ejection fraction.',
-    url:'https://diabetesjournals.org/care'
-  },
-  {
-    id:'a34',
-    title:'Visceral Obesity, Metabolic Syndrome, and Accelerated Coronary Atherosclerosis',
-    journal:'Lancet Diabetes Endocrinology', year:'2025',
-    tags:['chol','trestbps','prevention','lifestyle','fbs'],
-    summary:'Imaging study showing visceral fat area is a stronger predictor of non-calcified plaque burden than BMI, and that weight loss of ≥10% significantly slows plaque progression.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a35',
-    title:'Remote Patient Monitoring and Telemetry in Chronic Heart Failure: A Randomised Trial',
-    journal:'Eur Heart J', year:'2025',
-    tags:['heart_failure','trestbps','thalach','prevention'],
-    summary:'Demonstrates that implantable haemodynamic monitoring with physician-guided medication titration reduces HF hospitalisation by 37% compared to standard outpatient follow-up.',
-    url:'https://academic.oup.com/eurheartj'
-  },
-  {
-    id:'a36',
-    title:'GLP-1 Receptor Agonists and Major Adverse Cardiovascular Events: Class-Wide Meta-Analysis',
-    journal:'NEJM', year:'2025',
-    tags:['fbs','prevention','heart_failure','high_risk'],
-    summary:'Pooled analysis of LEADER, SUSTAIN-6, REWIND, and AMPLITUDE-O confirming GLP-1 agonists reduce MACE by 14% and HF hospitalisation by 11% in high-risk patients regardless of baseline HbA1c.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a37',
-    title:'Transcatheter vs. Surgical Aortic Valve Replacement: 5-Year Outcomes Across Risk Strata',
-    journal:'J Am Coll Cardiol', year:'2025',
-    tags:['cp','age','high_risk','oldpeak'],
-    summary:'Extended PARTNER 3 and Evolut Low Risk data showing TAVR is non-inferior to surgery for all-cause mortality at five years across low-, intermediate-, and high-risk surgical candidates.',
-    url:'https://www.jacc.org/'
-  },
-  {
-    id:'a38',
-    title:'High-Sensitivity Troponin for Early Rule-Out of Acute MI: Diagnostic Accuracy and Clinical Pathways',
-    journal:'Lancet', year:'2025',
-    tags:['cp','high_risk','oldpeak','angina'],
-    summary:'Prospective validation of 0h/1h and 0h/2h hs-cTnI algorithms achieving 99.0% negative predictive value for NSTEMI, enabling safe early discharge for 60% of chest pain presentations.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a39',
-    title:'High-Sensitivity CRP, Inflammation, and Residual Cardiovascular Risk Beyond LDL-C',
-    journal:'NEJM Evidence', year:'2025',
-    tags:['prevention','chol','high_risk','trestbps'],
-    summary:'CANTOS and RESCUE trial data establishing hsCRP >2 mg/L as an independent therapeutic target; colchicine and IL-6 inhibition reduce recurrent events beyond maximum statin therapy.',
-    url:'https://evidence.nejm.org/'
-  },
-  {
-    id:'a40',
-    title:'Cardiac Rehabilitation After Acute MI: Long-Term Adherence, Exercise Capacity, and Survival',
-    journal:'Circulation', year:'2025',
-    tags:['thalach','exang','prevention','lifestyle'],
-    summary:'Registry data from 47 000 post-MI patients showing each additional week of supervised rehabilitation independently reduces five-year mortality by 3.5%, with greatest benefit in reduced ejection fraction.',
-    url:'https://www.ahajournals.org/journal/circ'
-  },
-  {
-    id:'a41',
-    title:'Myocarditis in Young Athletes: Incidence, Clinical Course, and Return-to-Play Protocols',
-    journal:'JAMA Cardiology', year:'2024',
-    tags:['thalach','restecg','arrhythmia','cp'],
-    summary:'Multi-centre registry documenting clinical presentation, CMR characterisation, and structured return-to-play guidance for competitive athletes with biopsy-confirmed or CMR-diagnosed myocarditis.',
-    url:'https://jamanetwork.com/journals/jamacardiology'
-  },
-  {
-    id:'a42',
-    title:'Vasospastic Angina: Pathophysiology, Provocation Testing, and Calcium Channel Blocker Therapy',
-    journal:'Eur Heart J', year:'2025',
-    tags:['cp','angina','exang','trestbps'],
-    summary:'Comprehensive review of coronary artery vasospasm mechanisms, ergonovine and acetylcholine provocation protocols, and evidence for high-dose CCB therapy in reducing recurrent spasm.',
-    url:'https://academic.oup.com/eurheartj'
-  },
-  {
-    id:'a43',
-    title:'NT-proBNP-Guided Therapy in Heart Failure with Reduced Ejection Fraction',
-    journal:'Lancet', year:'2024',
-    tags:['heart_failure','trestbps','age','thalach'],
-    summary:'GUIDE-IT and PRIMA trial synthesis demonstrating that biomarker-guided titration of neurohormonal antagonists reduces HF hospitalisation by 20% compared to symptom-guided care alone.',
-    url:'https://www.thelancet.com/'
-  },
-  {
-    id:'a44',
-    title:'Mitral Regurgitation: Percutaneous Edge-to-Edge Repair vs. Medical Management in HFrEF',
-    journal:'NEJM', year:'2025',
-    tags:['cp','heart_failure','thalach','exang'],
-    summary:'COAPT 3-year data confirming MitraClip reduces HF hospitalisation by 47% and all-cause mortality by 38% in secondary MR patients on maximally-tolerated guideline-directed therapy.',
-    url:'https://www.nejm.org/'
-  },
-  {
-    id:'a45',
-    title:'Hyperkalaemia in Heart Failure: Patiromer, SZC, and Enabling Optimisation of RAAS Therapy',
-    journal:'J Am Coll Cardiol', year:'2025',
-    tags:['heart_failure','arrhythmia','restecg','age'],
-    summary:'AMBER and DIAMOND trial evidence showing potassium binders allow continued and up-titrated ACEi/ARB/MRA therapy in HF patients previously discontinued due to hyperkalaemia, improving survival.',
-    url:'https://www.jacc.org/'
-  }
-];
-
-var FEAT_LABELS = {
-  age:'Age', sex:'Sex', cp:'Chest pain type', trestbps:'Resting BP',
-  chol:'Cholesterol', fbs:'Blood sugar', restecg:'ECG result',
-  thalach:'Max heart rate', exang:'Exercise angina', oldpeak:'ST depression',
-  slope:'ST slope', ca:'Major vessels', thal:'Thalassemia'
-};
-
-var _articlePred = null;
-var _articlePredLast = null; // retains last prediction so reapply works after clear
-
-function _articleScore(a) {
-  if (!_articlePred) return 0;
-  var s = 0;
-  (_articlePred.top_features || []).forEach(function(f, i) {
-    if (a.tags.indexOf(f.name) !== -1) s += Math.max(4 - i, 1);
-  });
-  var rl = _articlePred.risk_level;
-  if (rl === 'High' && a.tags.indexOf('high_risk') !== -1) s += 4;
-  if ((rl === 'High' || rl === 'Medium') && a.tags.indexOf('heart_failure') !== -1) s += 3;
-  if (a.tags.indexOf('prevention') !== -1) s += (rl === 'Low' ? 3 : rl === 'Medium' ? 2 : 1);
-  return s;
-}
-
-function _makeArticleCard(a, rec) {
-  var hasUrl = a.url && a.url.trim() !== '';
-  var tagChips = a.tags.slice(0,3).map(function(t){
-    return '<span class="art-tag">'+(FEAT_LABELS[t]||t)+'</span>';
-  }).join('');
-  return '<div class="art-card'+(rec?' rec':'')+'">'
-    + (rec ? '<div class="art-rec-badge">RECOMMENDED</div>' : '')
-    + '<div class="art-title" style="padding-right:'+(rec?'110px':'0')+';">' + a.title + '</div>'
-    + '<div class="art-summary">' + a.summary + '</div>'
-    + '<div class="art-footer">'
-    + '<span class="art-journal">' + a.journal + '</span>'
-    + '<span class="art-year">' + a.year + '</span>'
-    + tagChips
-    + (hasUrl ? '<a href="'+a.url+'" target="_blank" rel="noopener noreferrer" class="art-link">⤴</a>' : '')
-    + '</div></div>';
-}
-
-function renderArticles() {
-  // Never touches mainArticleList — static cards in articles.html are permanent.
-  // Only manages the recommendation banner/section that appears above them.
-  function sd(id, val) { var e = document.getElementById(id); if (e) e.style.display = val; }
-  function txt(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; }
-
-  if (!_articlePred) {
-    sd('recSection', 'none');
-    sd('recBanner', 'none');
-    sd('reapplyBanner', _articlePredLast ? 'flex' : 'none');
-    txt('articlesSub', _articlePredLast
-      ? 'Recommendations cleared — click Reapply to restore them.'
-      : '45 peer-reviewed articles — run a prediction to get personalised recommendations.');
-    return;
-  }
-
-  var scored = ARTICLES.map(function(a){ return {a:a, s:_articleScore(a)}; })
-                        .sort(function(x,y){ return y.s - x.s; });
-  var rec = scored.filter(function(x){ return x.s > 0; }).slice(0,4).map(function(x){ return x.a; });
-
-  var recEl = document.getElementById('recList');
-  if (recEl) recEl.innerHTML = rec.map(function(a){ return _makeArticleCard(a, true); }).join('');
-  sd('recSection', rec.length ? 'block' : 'none');
-  sd('recBanner', 'flex');
-  sd('reapplyBanner', 'none');
-
-  var topLabels = (_articlePred.top_features||[]).slice(0,2)
-    .map(function(f){ return FEAT_LABELS[f.name]||f.name; }).join(', ');
-  txt('recBannerText', _articlePred.risk_level+' risk · Key drivers: '+topLabels+'. Articles ranked by clinical relevance.');
-  txt('articlesSub', rec.length+' articles recommended based on '+_articlePred.risk_level+' risk ('+_articlePred.risk_pct+'% confidence). All 15 articles below.');
-}
-
-window.setArticlePrediction = function(data) { _articlePred = data; _articlePredLast = data; renderArticles(); };
-window.clearArticleRec      = function()      { _articlePred = null; renderArticles(); };
-window.reapplyArticleRec    = function()      { _articlePred = _articlePredLast; renderArticles(); };
-
-function _fieldError(el, msg) {
-  el.style.borderColor = 'var(--red)';
-  var err = el.parentNode.querySelector('.field-err');
-  if (!err) {
-    err = document.createElement('div');
-    err.className = 'field-err';
-    err.style.cssText = 'font-size:10px;color:var(--red);margin-top:3px;display:flex;align-items:center;gap:4px;font-weight:500;';
-    el.parentNode.appendChild(err);
-  }
-  err.textContent = '✕  ' + msg;
-  err.style.display = 'flex';
-}
-function _fieldOk(el) {
-  el.style.borderColor = '';
-  var err = el.parentNode.querySelector('.field-err');
-  if (err) err.style.display = 'none';
-}
-window.validateInput = function(el) {
-  if (el.value === '') { _fieldOk(el); return; }
-  var v = parseFloat(el.value);
-  if (isNaN(v)) { _fieldOk(el); return; }
-  var mn = parseFloat(el.min), mx = parseFloat(el.max);
-  if (!isNaN(mn) && v < mn) { _fieldError(el, 'Min: ' + mn); return; }
-  if (!isNaN(mx) && v > mx) { _fieldError(el, 'Max: ' + mx); return; }
-  _fieldOk(el);
-};
-
-// ─── DOCTORS MAP ───
-var _doctorsMap = null;
-var _doctorsMarkers = [];
-var _doctorsAllPlaces = [];
-
-function requestDoctorsLocation() {
-  if (!navigator.geolocation) {
-    _doctorsSetError('Geolocation is not supported by your browser.');
-    return;
-  }
-  var btn = document.getElementById('doctorsLocBtn');
-  btn.innerHTML = '<span class="spinner" style="border-color:rgba(255,255,255,.3);border-top-color:#fff;"></span> Locating…';
-  btn.disabled = true;
-  document.getElementById('doctorsLocError').style.display = 'none';
-
-  navigator.geolocation.getCurrentPosition(
-    function(pos) { _doctorsInit(pos.coords.latitude, pos.coords.longitude); },
-    function(err) {
-      btn.disabled = false;
-      btn.innerHTML = '📍 &nbsp;Allow Location';
-      var msgs = {
-        1: 'Location access denied. Please allow it in your browser settings and try again.',
-        2: 'Location unavailable. Check your connection and try again.',
-        3: 'Request timed out. Please try again.'
-      };
-      _doctorsSetError(msgs[err.code] || 'Location access failed.');
-    },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 }
-  );
-}
-
-function _doctorsSetError(msg) {
-  var el = document.getElementById('doctorsLocError');
-  el.textContent = msg; el.style.display = 'block';
-}
-
-function _doctorsInit(lat, lng) {
-  document.getElementById('doctorsLocBox').style.display = 'none';
-  document.getElementById('doctorsMapPlaceholder').style.display = 'none';
-  document.getElementById('doctorsSub').textContent = 'Searching for cardiologists, hospitals, and clinics within 15 km…';
-
-  if (!_doctorsMap) {
-    _doctorsMap = L.map('doctorsMap', { zoomControl: true }).setView([lat, lng], 13);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19,
-      detectRetina: true
-    }).addTo(_doctorsMap);
-  } else {
-    _doctorsMap.setView([lat, lng], 13);
-  }
-
-  // Distinctive SVG pin for user location
-  var _userPin = L.divIcon({
-    className: '',
-    html: '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="42" viewBox="0 0 30 42">'
-      + '<path d="M15 0C6.7 0 0 6.7 0 15c0 11.2 15 27 15 27S30 26.2 30 15C30 6.7 23.3 0 15 0z" fill="#4a9eff" stroke="white" stroke-width="2.5"/>'
-      + '<circle cx="15" cy="15" r="6" fill="white"/>'
-      + '</svg>',
-    iconSize: [30, 42],
-    iconAnchor: [15, 42],
-    popupAnchor: [0, -44]
-  });
-  L.marker([lat, lng], { icon: _userPin })
-    .addTo(_doctorsMap)
-    .bindPopup('<b style="font-family:sans-serif;font-size:13px;">📍 Your location</b>');
-
-  _doctorsFetch(lat, lng);
-}
-
-async function _doctorsFetch(lat, lng) {
-  var listEl = document.getElementById('doctorsList');
-  listEl.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:13px;"><span class="spinner" style="border-color:var(--border2);border-top-color:var(--red);"></span><br><br>Searching nearby…</div>';
-
-  var q = '[out:json][timeout:30];\n(\n'
-    + '  node["healthcare:speciality"~"cardio",i](around:15000,' + lat + ',' + lng + ');\n'
-    + '  way["healthcare:speciality"~"cardio",i](around:15000,' + lat + ',' + lng + ');\n'
-    + '  node["speciality"~"cardio",i](around:15000,' + lat + ',' + lng + ');\n'
-    + '  way["speciality"~"cardio",i](around:15000,' + lat + ',' + lng + ');\n'
-    + '  node["specialty"~"cardio",i](around:15000,' + lat + ',' + lng + ');\n'
-    + '  way["specialty"~"cardio",i](around:15000,' + lat + ',' + lng + ');\n'
-    + '  node["name"~"cardio",i]["amenity"](around:15000,' + lat + ',' + lng + ');\n'
-    + '  way["name"~"cardio",i]["amenity"](around:15000,' + lat + ',' + lng + ');\n'
-    + '  node["amenity"="hospital"](around:10000,' + lat + ',' + lng + ');\n'
-    + '  way["amenity"="hospital"](around:10000,' + lat + ',' + lng + ');\n'
-    + '  node["amenity"="clinic"](around:8000,' + lat + ',' + lng + ');\n'
-    + '  way["amenity"="clinic"](around:8000,' + lat + ',' + lng + ');\n'
-    + ');\nout center tags;';
-
-  try {
-    var resp = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(q)
-    });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var json = await resp.json();
-    if (json.remark && (!json.elements || !json.elements.length)) throw new Error(json.remark);
-    var raw = json.elements || [];
-
-    var seen = {};
-    var places = [];
-    raw.forEach(function(el) {
-      var elLat = el.lat != null ? el.lat : (el.center ? el.center.lat : null);
-      var elLng = el.lon != null ? el.lon : (el.center ? el.center.lon : null);
-      if (elLat == null || elLng == null) return;
-      var tags = el.tags || {};
-      var key = elLat.toFixed(4) + ',' + elLng.toFixed(4);
-      if (seen[key]) return;
-      seen[key] = 1;
-
-      var specialtyRaw = (tags['healthcare:speciality'] || tags['speciality'] || tags['specialty'] || '').toLowerCase();
-      var amenity = tags.amenity || '';
-      var allNames = (tags.name || '') + ' ' + (tags['name:en'] || '') + ' ' + (tags['name:fr'] || '');
-      var nameLower = allNames.toLowerCase();
-
-      var cat;
-      if (specialtyRaw.indexOf('cardio') !== -1
-          || nameLower.indexOf('cardio') !== -1
-          || nameLower.indexOf('cardiolog') !== -1
-          || (tags.name || '').indexOf('قلب') !== -1) {
-        cat = 'cardiologist';
-      } else if (amenity === 'hospital') {
-        cat = 'hospital';
-      } else if (amenity === 'clinic') {
-        cat = 'clinic';
-      } else {
-        cat = 'cardiologist';
+        // Feed prediction to articles recommender
+        if (typeof window.setArticlePrediction === "function") {
+          window.setArticlePrediction(data);
+        }
       }
 
-      // Prefer English or French name over local-language name
-      var defaultNames = { cardiologist: 'Cardiologist', hospital: 'Hospital', clinic: 'Medical Clinic' };
-      var displayName = tags['name:en'] || tags['name:fr'] || tags.name || defaultNames[cat];
-      places.push({
-        name: displayName,
-        lat: elLat, lng: elLng, tags: tags, cat: cat,
-        dist: _haversine(lat, lng, elLat, elLng)
+      let lastAiReport = "";
+
+      async function generateAiReport(data, patientFields) {
+        const card = document.getElementById("aiReportCard");
+        const loading = document.getElementById("aiLoading");
+        const preview = document.getElementById("aiPreview");
+        const previewText = document.getElementById("aiPreviewText");
+        const buttonsContainer = document.getElementById("aiButtonsContainer");
+        const chip = document.getElementById("aiRiskChip");
+
+        if (!card) return;
+        card.style.display = "block";
+        loading.style.display = "flex";
+        preview.style.display = "none";
+        buttonsContainer.style.display = "none";
+
+        const chipColor =
+          data.risk_level === "High"
+            ? "var(--red)"
+            : data.risk_level === "Medium"
+              ? "var(--amber)"
+              : "var(--green)";
+        const chipBg =
+          data.risk_level === "High"
+            ? "var(--red-soft)"
+            : data.risk_level === "Medium"
+              ? "var(--amber-soft)"
+              : "var(--green-soft)";
+        chip.style.color = chipColor;
+        chip.style.background = chipBg;
+        chip.textContent = `● ${data.risk_level} Risk`;
+
+        const featNames = {
+          age: "Age",
+          sex: "Sex",
+          cp: "Chest pain type",
+          trestbps: "Resting BP",
+          chol: "Cholesterol",
+          fbs: "Fasting blood sugar",
+          restecg: "Resting ECG",
+          thalach: "Max heart rate",
+          exang: "Exercise angina",
+          oldpeak: "ST depression",
+          slope: "ST slope",
+          ca: "Major vessels",
+          thal: "Thalassemia",
+        };
+
+        const topFeatures = (data.top_features || [])
+          .map(
+            (f) => `${featNames[f.name] || f.name} (${f.importance}% weight)`,
+          )
+          .join(", ");
+        const patientSummary = Object.entries(patientFields)
+          .map(([k, v]) => `${featNames[k] || k}: ${v}`)
+          .join(", ");
+
+        const prompt = `You are a clinical decision support AI assisting cardiologists. A machine learning model has assessed a patient for heart disease risk.\n\nPatient data: ${patientSummary}\n\nModel result: ${data.risk_level} risk — ${data.risk_pct}% probability of heart disease.\nTop contributing features: ${topFeatures}\n\nWrite a concise clinical report with three short sections:\n1. Clinical Overview: (2-3 sentences summarising the patient profile and prediction)\n2. Key Risk Drivers: (bullet points explaining what each top feature means clinically)\n3. Recommended Actions: (3-4 specific clinical next steps)\n\nBe precise and medically appropriate. Do not use markdown headers — use plain text with the section names followed by a colon.`;
+
+        try {
+          const res = await fetch(API + "/ai-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          });
+          const j = await res.json();
+          const text = j.text || j.error || "Report unavailable.";
+          lastAiReport = text;
+          loading.style.display = "none";
+
+          // Show preview (truncated)
+          const previewLength = 250;
+          const displayText =
+            text.length > previewLength
+              ? text.substring(0, previewLength) + "..."
+              : text;
+          previewText.textContent = displayText;
+          preview.style.display = "block";
+          buttonsContainer.style.display = "flex";
+        } catch (e) {
+          loading.style.display = "none";
+          previewText.textContent =
+            "Could not generate AI report. Ensure your Groq API key is configured on the server.";
+          preview.style.display = "block";
+        }
+      }
+
+      function openAiModal() {
+        if (!lastAiReport) return;
+        const modal = document.getElementById("aiModal");
+        const content = document.getElementById("aiModalContent");
+        content.textContent = lastAiReport;
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeAiModal() {
+        const modal = document.getElementById("aiModal");
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+      }
+
+      function copyAiReport() {
+        if (!lastAiReport) return;
+        navigator.clipboard.writeText(lastAiReport);
+        const btn = event.target;
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = "Copy"), 2000);
+      }
+
+      function copyAiReportFromModal() {
+        if (!lastAiReport) return;
+        navigator.clipboard.writeText(lastAiReport);
+        const btn = event.target;
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = "Copy Report"), 2000);
+      }
+
+      // Close modal when clicking outside
+      document.addEventListener("click", function (event) {
+        const modal = document.getElementById("aiModal");
+        if (modal && event.target === modal) {
+          closeAiModal();
+        }
       });
-    });
 
-    places.sort(function(a, b) { return a.dist - b.dist; });
-    places = places.slice(0, 40);
-    _doctorsAllPlaces = places;
+      // ─── ARTICLES ───
+      var ARTICLES = [
+        {
+          id: "a1",
+          title:
+            "LDL-C Reduction and Atherosclerotic Cardiovascular Events: Updated Systematic Review and Meta-Analysis",
+          journal: "Lancet Cardiology",
+          year: "2024",
+          tags: ["chol", "prevention", "ca"],
+          summary:
+            "Reviews statin and non-statin therapies for cholesterol lowering and their impact on reducing coronary events in high-risk populations.",
+          url: "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(24)00473-8/fulltext",
+        },
+        {
+          id: "a2",
+          title:
+            "Antihypertensive Therapy and Major Cardiovascular Events: Individual Patient Data Meta-Analysis",
+          journal: "NEJM",
+          year: "2025",
+          tags: ["trestbps", "prevention", "high_risk"],
+          summary:
+            "Demonstrates that blood pressure reduction significantly lowers stroke, MI, and heart failure risk across all baseline BP levels above 130 mmHg.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a3",
+          title:
+            "Exercise-Induced ST Depression: Diagnostic Accuracy for Obstructive Coronary Artery Disease",
+          journal: "J Am Coll Cardiol",
+          year: "2025",
+          tags: ["oldpeak", "slope", "exang", "thalach"],
+          summary:
+            "Evaluates the sensitivity and specificity of ST-segment changes during stress testing for detecting haemodynamically significant coronary stenosis.",
+          url: "https://www.jacc.org/",
+        },
+        {
+          id: "a4",
+          title:
+            "Stable Angina and Exercise Limitation: Pathophysiology and Current Treatment Strategies",
+          journal: "Circulation",
+          year: "2025",
+          tags: ["cp", "exang", "thalach", "angina"],
+          summary:
+            "Covers the mechanisms of exercise-induced chest pain, triage of angina types, and evidence-based medical and interventional management.",
+          url: "https://www.ahajournals.org/journal/circ",
+        },
+        {
+          id: "a5",
+          title:
+            "Coronary Artery Disease Severity by Angiography and Long-Term Cardiovascular Mortality",
+          journal: "Eur Heart J",
+          year: "2025",
+          tags: ["ca", "high_risk", "cp"],
+          summary:
+            "Large cohort study linking the number of obstructed major vessels to 10-year mortality, informing revascularisation decision thresholds.",
+          url: "https://academic.oup.com/eurheartj",
+        },
+        {
+          id: "a6",
+          title:
+            "Cardiac Complications in Thalassemia: MRI Surveillance, Iron Chelation, and Outcomes",
+          journal: "Blood",
+          year: "2024",
+          tags: ["thal", "heart_failure", "high_risk"],
+          summary:
+            "Longitudinal analysis of cardiac iron loading in thalassaemia patients and efficacy of chelation therapy in preventing cardiomyopathy and heart failure.",
+          url: "https://ashpublications.org/blood",
+        },
+        {
+          id: "a7",
+          title:
+            "Fasting Hyperglycaemia as an Independent Predictor of Cardiovascular Events in Non-Diabetic Adults",
+          journal: "Diabetes Care",
+          year: "2025",
+          tags: ["fbs", "high_risk", "chol"],
+          summary:
+            "Prospective cohort demonstrating that fasting blood sugar above 100 mg/dL, even below the diabetic threshold, independently elevates 10-year cardiac risk.",
+          url: "https://diabetesjournals.org/care",
+        },
+        {
+          id: "a8",
+          title:
+            "Age-Specific Cardiovascular Risk Stratification: Biomarkers, Thresholds, and Clinical Decision Making",
+          journal: "JAMA Cardiology",
+          year: "2025",
+          tags: ["age", "prevention", "restecg"],
+          summary:
+            "Proposes revised risk calculators that account for age-dependent biomarker thresholds, improving prediction accuracy in patients over 55 and under 45.",
+          url: "https://jamanetwork.com/journals/jamacardiology",
+        },
+        {
+          id: "a9",
+          title:
+            "Sex Disparities in Coronary Heart Disease Presentation, Diagnosis, and Outcomes",
+          journal: "Eur Heart J",
+          year: "2025",
+          tags: ["sex", "cp", "prevention"],
+          summary:
+            "Reviews how symptoms, risk factors, and treatment responses differ between men and women, highlighting under-diagnosis of CAD in female patients.",
+          url: "https://academic.oup.com/eurheartj",
+        },
+        {
+          id: "a10",
+          title:
+            "Prevention of Heart Failure in High-Risk Patients: Pharmacological and Lifestyle Strategies",
+          journal: "NEJM",
+          year: "2024",
+          tags: ["heart_failure", "high_risk", "trestbps", "chol"],
+          summary:
+            "Comprehensive review of SGLT2 inhibitors, ACE inhibitors, and targeted lifestyle interventions in patients at elevated risk of developing heart failure.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a11",
+          title:
+            "Resting ECG Abnormalities and Risk of Major Adverse Cardiovascular Events in Asymptomatic Adults",
+          journal: "JAMA",
+          year: "2024",
+          tags: ["restecg", "age", "arrhythmia"],
+          summary:
+            "Population-based study linking resting ECG findings — LVH, ST changes, bundle branch blocks — to incident MI and arrhythmia over a 12-year follow-up.",
+          url: "https://jamanetwork.com/journals/jama",
+        },
+        {
+          id: "a12",
+          title:
+            "Supervised Cardiac Rehabilitation: Exercise Capacity, Mortality, and Hospital Readmission",
+          journal: "Lancet",
+          year: "2025",
+          tags: ["exang", "thalach", "heart_failure", "prevention"],
+          summary:
+            "Meta-analysis of 63 RCTs showing that structured rehabilitation programmes reduce all-cause mortality by 26% and cardiac readmission by 31%.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a13",
+          title:
+            "Mediterranean and DASH Dietary Patterns and Incident Cardiovascular Disease: A 20-Year Cohort",
+          journal: "NEJM Evidence",
+          year: "2025",
+          tags: ["prevention", "chol", "trestbps", "lifestyle"],
+          summary:
+            "Long-term cohort confirming that adherence to Mediterranean or DASH diets reduces CHD incidence by 28–34% independently of medication.",
+          url: "https://evidence.nejm.org/",
+        },
+        {
+          id: "a14",
+          title:
+            "Peak Exercise Heart Rate as a Predictor of Cardiovascular and All-Cause Mortality",
+          journal: "Circulation",
+          year: "2025",
+          tags: ["thalach", "exang", "high_risk"],
+          summary:
+            "Analysis of 85 000 stress tests showing that chronotropic incompetence — failure to reach 85% predicted max heart rate — is a strong independent mortality predictor.",
+          url: "https://www.ahajournals.org/journal/circ",
+        },
+        {
+          id: "a15",
+          title:
+            "Hereditary Cardiac Syndromes: Cascade Genetic Screening and Long-Term Risk Stratification",
+          journal: "Nature Medicine",
+          year: "2024",
+          tags: ["thal", "ca", "genetics", "age"],
+          summary:
+            "Demonstrates that cascade screening of first-degree relatives of patients with hereditary cardiac conditions yields a 1-in-4 diagnosis rate and improves outcomes.",
+          url: "https://www.nature.com/nm/",
+        },
+        {
+          id: "a16",
+          title:
+            "SGLT2 Inhibitors and Cardiovascular Outcomes: Evidence Beyond Glycaemic Control",
+          journal: "NEJM",
+          year: "2025",
+          tags: ["fbs", "heart_failure", "prevention"],
+          summary:
+            "Landmark trials confirm SGLT2 inhibitors reduce hospitalisation for heart failure and cardiovascular death in both diabetic and non-diabetic patients with elevated cardiac risk.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a17",
+          title:
+            "Atrial Fibrillation Detection, Stroke Risk, and Anticoagulation: Updated Clinical Practice Guidelines",
+          journal: "JAMA",
+          year: "2025",
+          tags: ["restecg", "arrhythmia", "age"],
+          summary:
+            "Consensus guidelines on ECG-based AF screening in adults over 65, stroke risk stratification using CHA₂DS₂-VASc, and evidence for direct oral anticoagulant therapy.",
+          url: "https://jamanetwork.com/journals/jama",
+        },
+        {
+          id: "a18",
+          title:
+            "Coronary Artery Calcium Scoring for Primary Prevention: Who Benefits Most?",
+          journal: "Lancet",
+          year: "2025",
+          tags: ["ca", "prevention", "chol", "age"],
+          summary:
+            "Prospective data showing that CAC scoring reclassifies risk in 25% of intermediate-risk patients and guides statin initiation more accurately than traditional risk calculators.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a19",
+          title:
+            "Hypertrophic Cardiomyopathy: Diagnosis, Sudden Death Risk Stratification, and Emerging Therapies",
+          journal: "NEJM",
+          year: "2024",
+          tags: ["thalach", "cp", "exang", "high_risk"],
+          summary:
+            "Comprehensive review of HCM pathophysiology, risk factors for sudden cardiac death, and the efficacy of mavacamten and surgical septal reduction in obstructive disease.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a20",
+          title:
+            "Omega-3 Fatty Acids and Residual Cardiovascular Risk After Statin Therapy",
+          journal: "NEJM Evidence",
+          year: "2025",
+          tags: ["chol", "prevention", "lifestyle"],
+          summary:
+            "Re-analysis of REDUCE-IT and STRENGTH trials clarifying which patient subgroups derive meaningful benefit from high-dose icosapentaenoic acid supplementation.",
+          url: "https://evidence.nejm.org/",
+        },
+        {
+          id: "a21",
+          title:
+            "Smoking Cessation and Rapid Reversal of Cardiovascular Risk: A 10-Year Prospective Analysis",
+          journal: "Lancet",
+          year: "2024",
+          tags: ["prevention", "high_risk", "trestbps"],
+          summary:
+            "Demonstrates that within two years of smoking cessation, cardiovascular event risk falls by 39%, approaching never-smoker levels within a decade regardless of pack-year history.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a22",
+          title:
+            "Exercise Intensity, Volume, and Cardiovascular Mortality: Dose-Response Across 100,000 Adults",
+          journal: "JAMA Cardiology",
+          year: "2025",
+          tags: ["thalach", "prevention", "lifestyle", "exang"],
+          summary:
+            "Large prospective cohort establishing optimal exercise thresholds — 150–300 min/week of moderate activity — and showing diminishing returns but no harm at very high volumes.",
+          url: "https://jamanetwork.com/journals/jamacardiology",
+        },
+        {
+          id: "a23",
+          title:
+            "Obstructive Sleep Apnoea, Nocturnal Hypertension, and Incident Cardiovascular Disease",
+          journal: "Circulation",
+          year: "2025",
+          tags: ["trestbps", "arrhythmia", "high_risk", "restecg"],
+          summary:
+            "Longitudinal study linking untreated OSA severity to nocturnal blood pressure surges, atrial fibrillation burden, and 40% higher incidence of major cardiac events.",
+          url: "https://www.ahajournals.org/journal/circ",
+        },
+        {
+          id: "a24",
+          title:
+            "Sex-Specific Mechanisms in Ischaemic Heart Disease: Microvascular Disease and MINOCA",
+          journal: "Eur Heart J",
+          year: "2025",
+          tags: ["sex", "cp", "trestbps", "high_risk"],
+          summary:
+            "Reviews the pathophysiology of myocardial infarction with non-obstructive coronary arteries (MINOCA), which disproportionately affects women and is frequently misdiagnosed.",
+          url: "https://academic.oup.com/eurheartj",
+        },
+        {
+          id: "a25",
+          title:
+            "Iron Deficiency in Heart Failure: Intravenous Repletion and Quality-of-Life Outcomes",
+          journal: "Eur Heart J",
+          year: "2025",
+          tags: ["heart_failure", "thal", "sex", "fbs"],
+          summary:
+            "AFFIRM-AHF follow-up data showing IV ferric carboxymaltose reduces HF hospitalisations by 26% in iron-deficient patients regardless of anaemia status.",
+          url: "https://academic.oup.com/eurheartj",
+        },
+        {
+          id: "a26",
+          title:
+            "Aortic Stenosis Progression and Optimal Timing for Valve Replacement",
+          journal: "J Am Coll Cardiol",
+          year: "2024",
+          tags: ["cp", "oldpeak", "slope", "high_risk"],
+          summary:
+            "Natural history study of asymptomatic severe AS demonstrating that early intervention reduces mortality compared to watchful waiting once mean gradient exceeds 40 mmHg.",
+          url: "https://www.jacc.org/",
+        },
+        {
+          id: "a27",
+          title:
+            "Cardiac CT Angiography vs. Functional Stress Testing in Stable Chest Pain: ISCHAEMIA Trial Extension",
+          journal: "NEJM",
+          year: "2025",
+          tags: ["ca", "cp", "exang", "thalach", "oldpeak"],
+          summary:
+            "Extended follow-up confirming that CTA-guided management identifies more obstructive disease but does not reduce death or MI compared to optimal medical therapy alone.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a28",
+          title:
+            "Polypharmacy in Elderly Patients with Heart Failure: Deprescribing Strategies and Outcomes",
+          journal: "Lancet",
+          year: "2025",
+          tags: ["age", "heart_failure", "prevention"],
+          summary:
+            "Randomised trial of structured deprescribing in HF patients over 75 — reducing pill burden by 30% without worsening outcomes and significantly improving adherence to guideline-directed therapy.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a29",
+          title:
+            "Depression, Psychological Stress, and Incident Coronary Artery Disease: Mechanistic Insights",
+          journal: "JAMA",
+          year: "2024",
+          tags: ["prevention", "high_risk", "sex", "age"],
+          summary:
+            "Meta-analysis of 22 cohorts demonstrating that major depression confers a 1.6-fold increase in incident CAD, mediated through HPA axis dysregulation and platelet hyper-reactivity.",
+          url: "https://jamanetwork.com/journals/jama",
+        },
+        {
+          id: "a30",
+          title:
+            "Resistant Hypertension: Prevalence, Mechanisms, and Renal Denervation Evidence",
+          journal: "Circulation",
+          year: "2025",
+          tags: ["trestbps", "high_risk", "ca"],
+          summary:
+            "Review of true versus pseudo-resistant hypertension, the role of aldosterone excess, and updated trial data on catheter-based renal denervation as adjunct therapy.",
+          url: "https://www.ahajournals.org/journal/circ",
+        },
+        {
+          id: "a31",
+          title:
+            "Inherited Arrhythmia Syndromes: Long QT, Brugada, and CPVT — Genetics to Clinical Management",
+          journal: "Nature Medicine",
+          year: "2025",
+          tags: ["genetics", "arrhythmia", "restecg", "thal"],
+          summary:
+            "Clinical genomics review covering genotype-phenotype correlations, risk stratification for sudden death, and ICD versus pharmacological management in inherited channelopathies.",
+          url: "https://www.nature.com/nm/",
+        },
+        {
+          id: "a32",
+          title:
+            "Dual Antiplatelet Therapy Duration After PCI: Personalising the Benefit-Risk Trade-off",
+          journal: "NEJM",
+          year: "2025",
+          tags: ["ca", "high_risk", "prevention"],
+          summary:
+            "Individual patient data meta-analysis enabling clinician-level risk scoring to determine optimal DAPT duration (6 vs. 12 vs. 24 months) after percutaneous coronary intervention.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a33",
+          title:
+            "Type 2 Diabetes, Coronary Microvascular Disease, and Diastolic Dysfunction",
+          journal: "Diabetes Care",
+          year: "2025",
+          tags: ["fbs", "chol", "heart_failure", "oldpeak"],
+          summary:
+            "Mechanistic study linking chronic hyperglycaemia to coronary microvascular dysfunction, impaired myocardial perfusion reserve, and early diastolic heart failure with preserved ejection fraction.",
+          url: "https://diabetesjournals.org/care",
+        },
+        {
+          id: "a34",
+          title:
+            "Visceral Obesity, Metabolic Syndrome, and Accelerated Coronary Atherosclerosis",
+          journal: "Lancet Diabetes Endocrinology",
+          year: "2025",
+          tags: ["chol", "trestbps", "prevention", "lifestyle", "fbs"],
+          summary:
+            "Imaging study showing visceral fat area is a stronger predictor of non-calcified plaque burden than BMI, and that weight loss of ≥10% significantly slows plaque progression.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a35",
+          title:
+            "Remote Patient Monitoring and Telemetry in Chronic Heart Failure: A Randomised Trial",
+          journal: "Eur Heart J",
+          year: "2025",
+          tags: ["heart_failure", "trestbps", "thalach", "prevention"],
+          summary:
+            "Demonstrates that implantable haemodynamic monitoring with physician-guided medication titration reduces HF hospitalisation by 37% compared to standard outpatient follow-up.",
+          url: "https://academic.oup.com/eurheartj",
+        },
+        {
+          id: "a36",
+          title:
+            "GLP-1 Receptor Agonists and Major Adverse Cardiovascular Events: Class-Wide Meta-Analysis",
+          journal: "NEJM",
+          year: "2025",
+          tags: ["fbs", "prevention", "heart_failure", "high_risk"],
+          summary:
+            "Pooled analysis of LEADER, SUSTAIN-6, REWIND, and AMPLITUDE-O confirming GLP-1 agonists reduce MACE by 14% and HF hospitalisation by 11% in high-risk patients regardless of baseline HbA1c.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a37",
+          title:
+            "Transcatheter vs. Surgical Aortic Valve Replacement: 5-Year Outcomes Across Risk Strata",
+          journal: "J Am Coll Cardiol",
+          year: "2025",
+          tags: ["cp", "age", "high_risk", "oldpeak"],
+          summary:
+            "Extended PARTNER 3 and Evolut Low Risk data showing TAVR is non-inferior to surgery for all-cause mortality at five years across low-, intermediate-, and high-risk surgical candidates.",
+          url: "https://www.jacc.org/",
+        },
+        {
+          id: "a38",
+          title:
+            "High-Sensitivity Troponin for Early Rule-Out of Acute MI: Diagnostic Accuracy and Clinical Pathways",
+          journal: "Lancet",
+          year: "2025",
+          tags: ["cp", "high_risk", "oldpeak", "angina"],
+          summary:
+            "Prospective validation of 0h/1h and 0h/2h hs-cTnI algorithms achieving 99.0% negative predictive value for NSTEMI, enabling safe early discharge for 60% of chest pain presentations.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a39",
+          title:
+            "High-Sensitivity CRP, Inflammation, and Residual Cardiovascular Risk Beyond LDL-C",
+          journal: "NEJM Evidence",
+          year: "2025",
+          tags: ["prevention", "chol", "high_risk", "trestbps"],
+          summary:
+            "CANTOS and RESCUE trial data establishing hsCRP >2 mg/L as an independent therapeutic target; colchicine and IL-6 inhibition reduce recurrent events beyond maximum statin therapy.",
+          url: "https://evidence.nejm.org/",
+        },
+        {
+          id: "a40",
+          title:
+            "Cardiac Rehabilitation After Acute MI: Long-Term Adherence, Exercise Capacity, and Survival",
+          journal: "Circulation",
+          year: "2025",
+          tags: ["thalach", "exang", "prevention", "lifestyle"],
+          summary:
+            "Registry data from 47 000 post-MI patients showing each additional week of supervised rehabilitation independently reduces five-year mortality by 3.5%, with greatest benefit in reduced ejection fraction.",
+          url: "https://www.ahajournals.org/journal/circ",
+        },
+        {
+          id: "a41",
+          title:
+            "Myocarditis in Young Athletes: Incidence, Clinical Course, and Return-to-Play Protocols",
+          journal: "JAMA Cardiology",
+          year: "2024",
+          tags: ["thalach", "restecg", "arrhythmia", "cp"],
+          summary:
+            "Multi-centre registry documenting clinical presentation, CMR characterisation, and structured return-to-play guidance for competitive athletes with biopsy-confirmed or CMR-diagnosed myocarditis.",
+          url: "https://jamanetwork.com/journals/jamacardiology",
+        },
+        {
+          id: "a42",
+          title:
+            "Vasospastic Angina: Pathophysiology, Provocation Testing, and Calcium Channel Blocker Therapy",
+          journal: "Eur Heart J",
+          year: "2025",
+          tags: ["cp", "angina", "exang", "trestbps"],
+          summary:
+            "Comprehensive review of coronary artery vasospasm mechanisms, ergonovine and acetylcholine provocation protocols, and evidence for high-dose CCB therapy in reducing recurrent spasm.",
+          url: "https://academic.oup.com/eurheartj",
+        },
+        {
+          id: "a43",
+          title:
+            "NT-proBNP-Guided Therapy in Heart Failure with Reduced Ejection Fraction",
+          journal: "Lancet",
+          year: "2024",
+          tags: ["heart_failure", "trestbps", "age", "thalach"],
+          summary:
+            "GUIDE-IT and PRIMA trial synthesis demonstrating that biomarker-guided titration of neurohormonal antagonists reduces HF hospitalisation by 20% compared to symptom-guided care alone.",
+          url: "https://www.thelancet.com/",
+        },
+        {
+          id: "a44",
+          title:
+            "Mitral Regurgitation: Percutaneous Edge-to-Edge Repair vs. Medical Management in HFrEF",
+          journal: "NEJM",
+          year: "2025",
+          tags: ["cp", "heart_failure", "thalach", "exang"],
+          summary:
+            "COAPT 3-year data confirming MitraClip reduces HF hospitalisation by 47% and all-cause mortality by 38% in secondary MR patients on maximally-tolerated guideline-directed therapy.",
+          url: "https://www.nejm.org/",
+        },
+        {
+          id: "a45",
+          title:
+            "Hyperkalaemia in Heart Failure: Patiromer, SZC, and Enabling Optimisation of RAAS Therapy",
+          journal: "J Am Coll Cardiol",
+          year: "2025",
+          tags: ["heart_failure", "arrhythmia", "restecg", "age"],
+          summary:
+            "AMBER and DIAMOND trial evidence showing potassium binders allow continued and up-titrated ACEi/ARB/MRA therapy in HF patients previously discontinued due to hyperkalaemia, improving survival.",
+          url: "https://www.jacc.org/",
+        },
+      ];
 
-    document.getElementById('doctorsFilters').style.display = 'flex';
-    document.getElementById('doctorsCount').style.display = 'block';
-    document.getElementById('doctorsLegend').style.display = 'flex';
-    document.querySelectorAll('.doc-chip').forEach(function(c) {
-      c.classList.toggle('active', c.dataset.cat === 'all');
-    });
+      var FEAT_LABELS = {
+        age: "Age",
+        sex: "Sex",
+        cp: "Chest pain type",
+        trestbps: "Resting BP",
+        chol: "Cholesterol",
+        fbs: "Blood sugar",
+        restecg: "ECG result",
+        thalach: "Max heart rate",
+        exang: "Exercise angina",
+        oldpeak: "ST depression",
+        slope: "ST slope",
+        ca: "Major vessels",
+        thal: "Thalassemia",
+      };
 
-    _doctorsRender(places, 'all providers');
+      var _articlePred = null;
+      var _articlePredLast = null; // retains last prediction so reapply works after clear
 
-  } catch(e) {
-    document.getElementById('doctorsSub').textContent = 'Could not load map data. Check your connection.';
-    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:var(--red);font-size:13px;line-height:1.7;">Failed to load nearby results.<br>Please try again later.</div>';
-  }
-}
+      function _articleScore(a) {
+        if (!_articlePred) return 0;
+        var s = 0;
+        (_articlePred.top_features || []).forEach(function (f, i) {
+          if (a.tags.indexOf(f.name) !== -1) s += Math.max(4 - i, 1);
+        });
+        var rl = _articlePred.risk_level;
+        if (rl === "High" && a.tags.indexOf("high_risk") !== -1) s += 4;
+        if (
+          (rl === "High" || rl === "Medium") &&
+          a.tags.indexOf("heart_failure") !== -1
+        )
+          s += 3;
+        if (a.tags.indexOf("prevention") !== -1)
+          s += rl === "Low" ? 3 : rl === "Medium" ? 2 : 1;
+        return s;
+      }
 
-function filterDoctors(cat) {
-  document.querySelectorAll('.doc-chip').forEach(function(c) {
-    c.classList.toggle('active', c.dataset.cat === cat);
-  });
-  var filtered = cat === 'all' ? _doctorsAllPlaces : _doctorsAllPlaces.filter(function(p) { return p.cat === cat; });
-  var label = { all: 'all providers', cardiologist: 'cardiologists', hospital: 'hospitals', clinic: 'clinics' }[cat] || cat;
-  _doctorsRender(filtered, label);
-}
+      function _makeArticleCard(a, rec) {
+        var hasUrl = a.url && a.url.trim() !== "";
+        var tagChips = a.tags
+          .slice(0, 3)
+          .map(function (t) {
+            return '<span class="art-tag">' + (FEAT_LABELS[t] || t) + "</span>";
+          })
+          .join("");
+        return (
+          '<div class="art-card' +
+          (rec ? " rec" : "") +
+          '">' +
+          (rec ? '<div class="art-rec-badge">RECOMMENDED</div>' : "") +
+          '<div class="art-title" style="padding-right:' +
+          (rec ? "110px" : "0") +
+          ';">' +
+          a.title +
+          "</div>" +
+          '<div class="art-summary">' +
+          a.summary +
+          "</div>" +
+          '<div class="art-footer">' +
+          '<span class="art-journal">' +
+          a.journal +
+          "</span>" +
+          '<span class="art-year">' +
+          a.year +
+          "</span>" +
+          tagChips +
+          (hasUrl
+            ? '<a href="' +
+              a.url +
+              '" target="_blank" rel="noopener noreferrer" class="art-link">⤴</a>'
+            : "") +
+          "</div></div>"
+        );
+      }
 
-function _doctorsRender(places, label) {
-  var listEl  = document.getElementById('doctorsList');
-  var countEl = document.getElementById('doctorsCount');
-  var sub     = document.getElementById('doctorsSub');
+      function renderArticles() {
+        // Never touches mainArticleList — static cards in articles.html are permanent.
+        // Only manages the recommendation banner/section that appears above them.
+        function sd(id, val) {
+          var e = document.getElementById(id);
+          if (e) e.style.display = val;
+        }
+        function txt(id, val) {
+          var e = document.getElementById(id);
+          if (e) e.textContent = val;
+        }
 
-  _doctorsMarkers.forEach(function(m) { _doctorsMap.removeLayer(m); });
-  _doctorsMarkers = [];
+        if (!_articlePred) {
+          sd("recSection", "none");
+          sd("recBanner", "none");
+          sd("reapplyBanner", _articlePredLast ? "flex" : "none");
+          txt(
+            "articlesSub",
+            _articlePredLast
+              ? "Recommendations cleared — click Reapply to restore them."
+              : "45 peer-reviewed articles — run a prediction to get personalised recommendations.",
+          );
+          return;
+        }
 
-  if (places.length === 0) {
-    sub.textContent = 'No results for this filter.';
-    countEl.textContent = '0 results';
-    listEl.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:13px;line-height:1.7;">Nothing found for this category.<br>Try a different filter.</div>';
-    return;
-  }
+        var scored = ARTICLES.map(function (a) {
+          return { a: a, s: _articleScore(a) };
+        }).sort(function (x, y) {
+          return y.s - x.s;
+        });
+        var rec = scored
+          .filter(function (x) {
+            return x.s > 0;
+          })
+          .slice(0, 4)
+          .map(function (x) {
+            return x.a;
+          });
 
-  sub.textContent = places.length + ' ' + label + ' found within 15 km.';
-  countEl.textContent = places.length + ' result' + (places.length === 1 ? '' : 's');
+        var recEl = document.getElementById("recList");
+        if (recEl)
+          recEl.innerHTML = rec
+            .map(function (a) {
+              return _makeArticleCard(a, true);
+            })
+            .join("");
+        sd("recSection", rec.length ? "block" : "none");
+        sd("recBanner", "flex");
+        sd("reapplyBanner", "none");
 
-  var markerColors = { cardiologist: '#e55', hospital: '#f5a623', clinic: '#4a9eff' };
+        var topLabels = (_articlePred.top_features || [])
+          .slice(0, 2)
+          .map(function (f) {
+            return FEAT_LABELS[f.name] || f.name;
+          })
+          .join(", ");
+        txt(
+          "recBannerText",
+          _articlePred.risk_level +
+            " risk · Key drivers: " +
+            topLabels +
+            ". Articles ranked by clinical relevance.",
+        );
+        txt(
+          "articlesSub",
+          rec.length +
+            " articles recommended based on " +
+            _articlePred.risk_level +
+            " risk (" +
+            _articlePred.risk_pct +
+            "% confidence). All 15 articles below.",
+        );
+      }
 
-  places.forEach(function(p, i) {
-    var color = markerColors[p.cat] || '#e55';
-    var m = L.circleMarker([p.lat, p.lng], {
-      radius: 9, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.9
-    });
-    m.bindPopup(
-      '<div style="font-family:sans-serif;min-width:180px;line-height:1.65;">'
-      + '<b style="font-size:13px;">' + _esc(p.name) + '</b><br>'
-      + '<span style="color:#888;font-size:12px;">' + _catLabel(p.cat) + ' · ' + p.dist.toFixed(1) + ' km</span>'
-      + (p.tags.phone ? '<br>📞 <span style="font-size:12px;">' + _esc(p.tags.phone) + '</span>' : '')
-      + (p.tags['opening_hours'] ? '<br>🕐 <span style="font-size:12px;">' + _esc(p.tags['opening_hours']) + '</span>' : '')
-      + '</div>'
-    );
-    m.on('click', function() { _doctorsHighlight(i); });
-    m.addTo(_doctorsMap);
-    _doctorsMarkers.push(m);
-  });
+      window.setArticlePrediction = function (data) {
+        _articlePred = data;
+        _articlePredLast = data;
+        renderArticles();
+      };
+      window.clearArticleRec = function () {
+        _articlePred = null;
+        renderArticles();
+      };
+      window.reapplyArticleRec = function () {
+        _articlePred = _articlePredLast;
+        renderArticles();
+      };
 
-  var group = L.featureGroup(_doctorsMarkers);
-  _doctorsMap.fitBounds(group.getBounds().pad(0.15));
+      function _fieldError(el, msg) {
+        el.style.borderColor = "var(--red)";
+        var err = el.parentNode.querySelector(".field-err");
+        if (!err) {
+          err = document.createElement("div");
+          err.className = "field-err";
+          err.style.cssText =
+            "font-size:10px;color:var(--red);margin-top:3px;display:flex;align-items:center;gap:4px;font-weight:500;";
+          el.parentNode.appendChild(err);
+        }
+        err.textContent = "✕  " + msg;
+        err.style.display = "flex";
+      }
+      function _fieldOk(el) {
+        el.style.borderColor = "";
+        var err = el.parentNode.querySelector(".field-err");
+        if (err) err.style.display = "none";
+      }
+      window.validateInput = function (el) {
+        if (el.value === "") {
+          _fieldOk(el);
+          return;
+        }
+        var v = parseFloat(el.value);
+        if (isNaN(v)) {
+          _fieldOk(el);
+          return;
+        }
+        var mn = parseFloat(el.min),
+          mx = parseFloat(el.max);
+        if (!isNaN(mn) && v < mn) {
+          _fieldError(el, "Min: " + mn);
+          return;
+        }
+        if (!isNaN(mx) && v > mx) {
+          _fieldError(el, "Max: " + mx);
+          return;
+        }
+        _fieldOk(el);
+      };
 
-  listEl.innerHTML = places.map(function(p, i) { return _doctorCard(p, i); }).join('');
-}
+      // ─── DOCTORS MAP ───
+      var _doctorsMap = null;
+      var _doctorsMarkers = [];
+      var _doctorsAllPlaces = [];
 
-function _catLabel(cat) {
-  return { cardiologist: '❤️ Cardiologist', hospital: '🏥 Hospital', clinic: '🩺 Clinic' }[cat] || '⚕️ Healthcare';
-}
+      function requestDoctorsLocation() {
+        if (!navigator.geolocation) {
+          _doctorsSetError("Geolocation is not supported by your browser.");
+          return;
+        }
+        var btn = document.getElementById("doctorsLocBtn");
+        btn.innerHTML =
+          '<span class="spinner" style="border-color:rgba(255,255,255,.3);border-top-color:#fff;"></span> Locating…';
+        btn.disabled = true;
+        document.getElementById("doctorsLocError").style.display = "none";
 
-function _doctorCard(p, i) {
-  var bgSoft = { cardiologist: 'var(--red-soft)',  hospital: 'var(--amber-soft)', clinic: 'var(--blue-soft)'  }[p.cat] || 'var(--red-soft)';
-  var fgColor = { cardiologist: 'var(--red)',      hospital: 'var(--amber)',      clinic: 'var(--blue)'       }[p.cat] || 'var(--red)';
-  var icon    = { cardiologist: '❤️',              hospital: '🏥',               clinic: '🩺'               }[p.cat] || '⚕️';
-  var specialty = p.tags['healthcare:speciality'] || p.tags['speciality'] || p.tags['specialty'] || '';
-  var addr = [p.tags['addr:housenumber'], (p.tags['addr:street:en'] || p.tags['addr:street'])].filter(Boolean).join(' ');
-  var phone = p.tags.phone || p.tags['contact:phone'] || '';
-  var hours = p.tags['opening_hours'] || '';
-  var web   = p.tags.website || p.tags['contact:website'] || '';
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            _doctorsInit(pos.coords.latitude, pos.coords.longitude);
+          },
+          function (err) {
+            btn.disabled = false;
+            btn.innerHTML = "📍 &nbsp;Allow Location";
+            var msgs = {
+              1: "Location access denied. Please allow it in your browser settings and try again.",
+              2: "Location unavailable. Check your connection and try again.",
+              3: "Request timed out. Please try again.",
+            };
+            _doctorsSetError(msgs[err.code] || "Location access failed.");
+          },
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 },
+        );
+      }
 
-  return '<div class="doc-card" id="dcard-' + i + '" onclick="focusDoctor(' + i + ')">'
-    + '<div class="doc-icon" style="background:' + bgSoft + ';">' + icon + '</div>'
-    + '<div style="min-width:0;flex:1;">'
-    + '<div class="doc-name" title="' + _esc(p.name) + '">' + _esc(p.name) + '</div>'
-    + '<div class="doc-type" style="color:' + fgColor + ';">' + _catLabel(p.cat) + '</div>'
-    + '<div class="doc-meta">'
-    + (specialty ? '🩺 ' + _esc(specialty) + '<br>' : '')
-    + (addr      ? '📍 ' + _esc(addr)      + '<br>' : '')
-    + (phone     ? '📞 ' + _esc(phone)     + '<br>' : '')
-    + (hours     ? '🕐 ' + _esc(hours)     + '<br>' : '')
-    + (web       ? '<a href="' + _esc(web) + '" target="_blank" rel="noopener" style="color:var(--blue);font-size:11px;text-decoration:none;">🔗 Website</a>' : '')
-    + '</div>'
-    + '</div>'
-    + '<div class="doc-dist">' + p.dist.toFixed(1) + ' km</div>'
-    + '</div>';
-}
+      function _doctorsSetError(msg) {
+        var el = document.getElementById("doctorsLocError");
+        el.textContent = msg;
+        el.style.display = "block";
+      }
 
-function focusDoctor(i) {
-  _doctorsHighlight(i);
-  if (_doctorsMarkers[i]) {
-    _doctorsMap.flyTo(_doctorsMarkers[i].getLatLng(), 16, { animate: true, duration: 0.7 });
-    setTimeout(function() { if (_doctorsMarkers[i]) _doctorsMarkers[i].openPopup(); }, 700);
-  }
-}
+      function _doctorsInit(lat, lng) {
+        document.getElementById("doctorsLocBox").style.display = "none";
+        document.getElementById("doctorsMapPlaceholder").style.display = "none";
+        document.getElementById("doctorsSub").textContent =
+          "Searching for cardiologists, hospitals, and clinics within 15 km…";
 
-function _doctorsHighlight(i) {
-  document.querySelectorAll('.doc-card').forEach(function(c, j) {
-    c.classList.toggle('active', j === i);
-  });
-  var card = document.getElementById('dcard-' + i);
-  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+        if (!_doctorsMap) {
+          _doctorsMap = L.map("doctorsMap", { zoomControl: true }).setView(
+            [lat, lng],
+            13,
+          );
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: "abcd",
+            maxZoom: 19,
+            detectRetina: true,
+          }).addTo(_doctorsMap);
+        } else {
+          _doctorsMap.setView([lat, lng], 13);
+        }
 
-function _haversine(lat1, lng1, lat2, lng2) {
-  var R = 6371, dL = (lat2 - lat1) * Math.PI / 180, dG = (lng2 - lng1) * Math.PI / 180;
-  var a = Math.sin(dL/2)*Math.sin(dL/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dG/2)*Math.sin(dG/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
+        // Distinctive SVG pin for user location
+        var _userPin = L.divIcon({
+          className: "",
+          html:
+            '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="42" viewBox="0 0 30 42">' +
+            '<path d="M15 0C6.7 0 0 6.7 0 15c0 11.2 15 27 15 27S30 26.2 30 15C30 6.7 23.3 0 15 0z" fill="#4a9eff" stroke="white" stroke-width="2.5"/>' +
+            '<circle cx="15" cy="15" r="6" fill="white"/>' +
+            "</svg>",
+          iconSize: [30, 42],
+          iconAnchor: [15, 42],
+          popupAnchor: [0, -44],
+        });
+        L.marker([lat, lng], { icon: _userPin })
+          .addTo(_doctorsMap)
+          .bindPopup(
+            '<b style="font-family:sans-serif;font-size:13px;">📍 Your location</b>',
+          );
 
-function _esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+        _doctorsFetch(lat, lng);
+      }
 
-// Check backend on load
-(async () => {
-  try {
-    const r = await fetch(API+'/health');
-    const d = await r.json();
-    if (d.dataset_loaded) {
-      const sr = await fetch(API+'/stats');
-      statsData = await sr.json();
-      enableSections();
-    }
-  } catch(e) {}
-})();
-</script>
-</body>
+      async function _doctorsFetch(lat, lng) {
+        var listEl = document.getElementById("doctorsList");
+        listEl.innerHTML =
+          '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:13px;"><span class="spinner" style="border-color:var(--border2);border-top-color:var(--red);"></span><br><br>Searching nearby…</div>';
+
+        var q =
+          "[out:json][timeout:30];\n(\n" +
+          '  node["healthcare:speciality"~"cardio",i](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  way["healthcare:speciality"~"cardio",i](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  node["speciality"~"cardio",i](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  way["speciality"~"cardio",i](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  node["specialty"~"cardio",i](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  way["specialty"~"cardio",i](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  node["name"~"cardio",i]["amenity"](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  way["name"~"cardio",i]["amenity"](around:15000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  node["amenity"="hospital"](around:10000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  way["amenity"="hospital"](around:10000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  node["amenity"="clinic"](around:8000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          '  way["amenity"="clinic"](around:8000,' +
+          lat +
+          "," +
+          lng +
+          ");\n" +
+          ");\nout center tags;";
+
+        try {
+          var resp = await fetch("https://overpass-api.de/api/interpreter", {
+            method: "POST",
+            body: "data=" + encodeURIComponent(q),
+          });
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          var json = await resp.json();
+          if (json.remark && (!json.elements || !json.elements.length))
+            throw new Error(json.remark);
+          var raw = json.elements || [];
+
+          var seen = {};
+          var places = [];
+          raw.forEach(function (el) {
+            var elLat =
+              el.lat != null ? el.lat : el.center ? el.center.lat : null;
+            var elLng =
+              el.lon != null ? el.lon : el.center ? el.center.lon : null;
+            if (elLat == null || elLng == null) return;
+            var tags = el.tags || {};
+            var key = elLat.toFixed(4) + "," + elLng.toFixed(4);
+            if (seen[key]) return;
+            seen[key] = 1;
+
+            var specialtyRaw = (
+              tags["healthcare:speciality"] ||
+              tags["speciality"] ||
+              tags["specialty"] ||
+              ""
+            ).toLowerCase();
+            var amenity = tags.amenity || "";
+            var allNames =
+              (tags.name || "") +
+              " " +
+              (tags["name:en"] || "") +
+              " " +
+              (tags["name:fr"] || "");
+            var nameLower = allNames.toLowerCase();
+
+            var cat;
+            if (
+              specialtyRaw.indexOf("cardio") !== -1 ||
+              nameLower.indexOf("cardio") !== -1 ||
+              nameLower.indexOf("cardiolog") !== -1 ||
+              (tags.name || "").indexOf("قلب") !== -1
+            ) {
+              cat = "cardiologist";
+            } else if (amenity === "hospital") {
+              cat = "hospital";
+            } else if (amenity === "clinic") {
+              cat = "clinic";
+            } else {
+              cat = "cardiologist";
+            }
+
+            // Prefer English or French name over local-language name
+            var defaultNames = {
+              cardiologist: "Cardiologist",
+              hospital: "Hospital",
+              clinic: "Medical Clinic",
+            };
+            var displayName =
+              tags["name:en"] ||
+              tags["name:fr"] ||
+              tags.name ||
+              defaultNames[cat];
+            places.push({
+              name: displayName,
+              lat: elLat,
+              lng: elLng,
+              tags: tags,
+              cat: cat,
+              dist: _haversine(lat, lng, elLat, elLng),
+            });
+          });
+
+          places.sort(function (a, b) {
+            return a.dist - b.dist;
+          });
+          places = places.slice(0, 40);
+          _doctorsAllPlaces = places;
+
+          document.getElementById("doctorsFilters").style.display = "flex";
+          document.getElementById("doctorsCount").style.display = "block";
+          document.getElementById("doctorsLegend").style.display = "flex";
+          document.querySelectorAll(".doc-chip").forEach(function (c) {
+            c.classList.toggle("active", c.dataset.cat === "all");
+          });
+
+          _doctorsRender(places, "all providers");
+        } catch (e) {
+          document.getElementById("doctorsSub").textContent =
+            "Could not load map data. Check your connection.";
+          listEl.innerHTML =
+            '<div style="text-align:center;padding:36px 20px;color:var(--red);font-size:13px;line-height:1.7;">Failed to load nearby results.<br>Please try again later.</div>';
+        }
+      }
+
+      function filterDoctors(cat) {
+        document.querySelectorAll(".doc-chip").forEach(function (c) {
+          c.classList.toggle("active", c.dataset.cat === cat);
+        });
+        var filtered =
+          cat === "all"
+            ? _doctorsAllPlaces
+            : _doctorsAllPlaces.filter(function (p) {
+                return p.cat === cat;
+              });
+        var label =
+          {
+            all: "all providers",
+            cardiologist: "cardiologists",
+            hospital: "hospitals",
+            clinic: "clinics",
+          }[cat] || cat;
+        _doctorsRender(filtered, label);
+      }
+
+      function _doctorsRender(places, label) {
+        var listEl = document.getElementById("doctorsList");
+        var countEl = document.getElementById("doctorsCount");
+        var sub = document.getElementById("doctorsSub");
+
+        _doctorsMarkers.forEach(function (m) {
+          _doctorsMap.removeLayer(m);
+        });
+        _doctorsMarkers = [];
+
+        if (places.length === 0) {
+          sub.textContent = "No results for this filter.";
+          countEl.textContent = "0 results";
+          listEl.innerHTML =
+            '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:13px;line-height:1.7;">Nothing found for this category.<br>Try a different filter.</div>';
+          return;
+        }
+
+        sub.textContent = places.length + " " + label + " found within 15 km.";
+        countEl.textContent =
+          places.length + " result" + (places.length === 1 ? "" : "s");
+
+        var markerColors = {
+          cardiologist: "#e55",
+          hospital: "#f5a623",
+          clinic: "#4a9eff",
+        };
+
+        places.forEach(function (p, i) {
+          var color = markerColors[p.cat] || "#e55";
+          var m = L.circleMarker([p.lat, p.lng], {
+            radius: 9,
+            fillColor: color,
+            color: "#fff",
+            weight: 2,
+            fillOpacity: 0.9,
+          });
+          m.bindPopup(
+            '<div style="font-family:sans-serif;min-width:180px;line-height:1.65;">' +
+              '<b style="font-size:13px;">' +
+              _esc(p.name) +
+              "</b><br>" +
+              '<span style="color:#888;font-size:12px;">' +
+              _catLabel(p.cat) +
+              " · " +
+              p.dist.toFixed(1) +
+              " km</span>" +
+              (p.tags.phone
+                ? '<br>📞 <span style="font-size:12px;">' +
+                  _esc(p.tags.phone) +
+                  "</span>"
+                : "") +
+              (p.tags["opening_hours"]
+                ? '<br>🕐 <span style="font-size:12px;">' +
+                  _esc(p.tags["opening_hours"]) +
+                  "</span>"
+                : "") +
+              "</div>",
+          );
+          m.on("click", function () {
+            _doctorsHighlight(i);
+          });
+          m.addTo(_doctorsMap);
+          _doctorsMarkers.push(m);
+        });
+
+        var group = L.featureGroup(_doctorsMarkers);
+        _doctorsMap.fitBounds(group.getBounds().pad(0.15));
+
+        listEl.innerHTML = places
+          .map(function (p, i) {
+            return _doctorCard(p, i);
+          })
+          .join("");
+      }
+
+      function _catLabel(cat) {
+        return (
+          {
+            cardiologist: "❤️ Cardiologist",
+            hospital: "🏥 Hospital",
+            clinic: "🩺 Clinic",
+          }[cat] || "⚕️ Healthcare"
+        );
+      }
+
+      function _doctorCard(p, i) {
+        var bgSoft =
+          {
+            cardiologist: "var(--red-soft)",
+            hospital: "var(--amber-soft)",
+            clinic: "var(--blue-soft)",
+          }[p.cat] || "var(--red-soft)";
+        var fgColor =
+          {
+            cardiologist: "var(--red)",
+            hospital: "var(--amber)",
+            clinic: "var(--blue)",
+          }[p.cat] || "var(--red)";
+        var icon =
+          { cardiologist: "❤️", hospital: "🏥", clinic: "🩺" }[p.cat] || "⚕️";
+        var specialty =
+          p.tags["healthcare:speciality"] ||
+          p.tags["speciality"] ||
+          p.tags["specialty"] ||
+          "";
+        var addr = [
+          p.tags["addr:housenumber"],
+          p.tags["addr:street:en"] || p.tags["addr:street"],
+        ]
+          .filter(Boolean)
+          .join(" ");
+        var phone = p.tags.phone || p.tags["contact:phone"] || "";
+        var hours = p.tags["opening_hours"] || "";
+        var web = p.tags.website || p.tags["contact:website"] || "";
+
+        return (
+          '<div class="doc-card" id="dcard-' +
+          i +
+          '" onclick="focusDoctor(' +
+          i +
+          ')">' +
+          '<div class="doc-icon" style="background:' +
+          bgSoft +
+          ';">' +
+          icon +
+          "</div>" +
+          '<div style="min-width:0;flex:1;">' +
+          '<div class="doc-name" title="' +
+          _esc(p.name) +
+          '">' +
+          _esc(p.name) +
+          "</div>" +
+          '<div class="doc-type" style="color:' +
+          fgColor +
+          ';">' +
+          _catLabel(p.cat) +
+          "</div>" +
+          '<div class="doc-meta">' +
+          (specialty ? "🩺 " + _esc(specialty) + "<br>" : "") +
+          (addr ? "📍 " + _esc(addr) + "<br>" : "") +
+          (phone ? "📞 " + _esc(phone) + "<br>" : "") +
+          (hours ? "🕐 " + _esc(hours) + "<br>" : "") +
+          (web
+            ? '<a href="' +
+              _esc(web) +
+              '" target="_blank" rel="noopener" style="color:var(--blue);font-size:11px;text-decoration:none;">🔗 Website</a>'
+            : "") +
+          "</div>" +
+          "</div>" +
+          '<div class="doc-dist">' +
+          p.dist.toFixed(1) +
+          " km</div>" +
+          "</div>"
+        );
+      }
+
+      function focusDoctor(i) {
+        _doctorsHighlight(i);
+        if (_doctorsMarkers[i]) {
+          _doctorsMap.flyTo(_doctorsMarkers[i].getLatLng(), 16, {
+            animate: true,
+            duration: 0.7,
+          });
+          setTimeout(function () {
+            if (_doctorsMarkers[i]) _doctorsMarkers[i].openPopup();
+          }, 700);
+        }
+      }
+
+      function _doctorsHighlight(i) {
+        document.querySelectorAll(".doc-card").forEach(function (c, j) {
+          c.classList.toggle("active", j === i);
+        });
+        var card = document.getElementById("dcard-" + i);
+        if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function _haversine(lat1, lng1, lat2, lng2) {
+        var R = 6371,
+          dL = ((lat2 - lat1) * Math.PI) / 180,
+          dG = ((lng2 - lng1) * Math.PI) / 180;
+        var a =
+          Math.sin(dL / 2) * Math.sin(dL / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dG / 2) *
+            Math.sin(dG / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+
+      function _esc(s) {
+        var d = document.createElement("div");
+        d.textContent = s || "";
+        return d.innerHTML;
+      }
+
+      // Check backend on load
+      (async () => {
+        try {
+          const r = await fetch(API + "/health");
+          const d = await r.json();
+          if (d.dataset_loaded) {
+            const sr = await fetch(API + "/stats");
+            statsData = await sr.json();
+            enableSections();
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </body>
 </html>
