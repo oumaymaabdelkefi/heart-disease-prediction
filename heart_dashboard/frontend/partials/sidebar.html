@@ -1,0 +1,26 @@
+<div class="logo">
+  <div class="logo-title">Dr. Cat</div>
+  <div class="logo-sub">Heart Disease Analytics</div>
+</div>
+<div class="nav-item active" data-section="home" onclick="nav(this)">
+  <span class="nav-icon">⌂</span> Home
+</div>
+<div class="nav-item locked" data-section="upload" onclick="navGated(this)">
+  <span class="nav-icon">⬆</span> Upload Dataset <span class="lock-icon" style="margin-left:auto;font-size:10px;opacity:.5;">🔒</span>
+</div>
+<div class="nav-item locked" data-section="dashboard" onclick="navGated(this)">
+  <span class="nav-icon">▦</span> Dashboard <span class="lock-icon" style="margin-left:auto;font-size:10px;opacity:.5;">🔒</span>
+</div>
+<div class="nav-item locked" data-section="predict" onclick="navGated(this)">
+  <span class="nav-icon">◎</span> Predict <span class="lock-icon" style="margin-left:auto;font-size:10px;opacity:.5;">🔒</span>
+</div>
+<div class="nav-item locked" data-section="articles" onclick="navGated(this)">
+  <span class="nav-icon">≡</span> Articles <span class="lock-icon" style="margin-left:auto;font-size:10px;opacity:.5;">🔒</span>
+</div>
+<div class="nav-item locked" data-section="doctors" onclick="navGated(this)">
+  <span class="nav-icon">⊕</span> Find Doctors <span class="lock-icon" style="margin-left:auto;font-size:10px;opacity:.5;">🔒</span>
+</div>
+<button id="themeToggle" class="theme-toggle" title="Toggle light / dark" onclick="toggleTheme()">🌙 Night</button>
+<div class="sidebar-footer">
+  <img id="sidebarCat" data-src="assets/dr-cat.jpg" alt="Cat in medical suit" />
+</div>

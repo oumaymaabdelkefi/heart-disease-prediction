@@ -1,0 +1,54 @@
+<section class="section" id="sec-dashboard">
+  <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;">
+    <div>
+      <h1 class="page-title">Analytics Dashboard</h1>
+      <p class="page-sub" id="dash-sub">Overview of your dataset.</p>
+    </div>
+    <div id="accBadge" style="display:none" class="acc-badge">
+      <span>●</span> Model accuracy: <span id="accVal">—</span>%
+    </div>
+  </div>
+  <div id="dash-no-data" class="no-data">
+    <div class="no-data-icon">📊</div>
+    <p>No dataset loaded yet. Upload a CSV file to see your analytics.</p>
+    <button class="no-data-btn" onclick="nav(document.querySelector('[data-section=upload]'))">Go to Upload</button>
+  </div>
+  <div id="dash-content" style="display:none">
+    <div class="metrics-grid" id="metricsGrid"></div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-title">Disease by age group</div>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#e55"></span>Heart disease</span>
+          <span class="leg"><span class="leg-dot" style="background:#4a9eff"></span>No disease</span>
+        </div>
+        <div style="position:relative;height:220px"><canvas id="ageChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Overall distribution</div>
+        <div style="position:relative;height:240px"><canvas id="donutChart"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-row3">
+      <div class="chart-card">
+        <div class="chart-card-title">Chest pain types</div>
+        <div style="position:relative;height:190px"><canvas id="cpChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Disease rate by sex</div>
+        <div style="position:relative;height:190px"><canvas id="sexChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">ST depression (oldpeak)</div>
+        <div style="position:relative;height:190px"><canvas id="oldpeakChart"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Clinical risk summary</div>
+      <table class="risk-table">
+        <thead><tr><th>Indicator</th><th>Value</th><th>Clinical note</th><th>Risk</th></tr></thead>
+        <tbody id="riskTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>

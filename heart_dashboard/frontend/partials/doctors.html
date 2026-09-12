@@ -1,0 +1,111 @@
+<section id="sec-doctors" class="section">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap;">
+    <div>
+      <div class="page-title">Nearby Heart Care</div>
+      <div class="page-sub" id="doctorsSub">Allow location access to find cardiologists, hospitals, and clinics near you.</div>
+    </div>
+    <div id="doctorsLegend" style="display:none;align-items:center;gap:18px;padding-top:6px;">
+      <span class="doc-legend-item"><span style="background:#e55;"></span>Cardiologist</span>
+      <span class="doc-legend-item"><span style="background:#f5a623;"></span>Hospital</span>
+      <span class="doc-legend-item"><span style="background:#4a9eff;"></span>Clinic</span>
+    </div>
+  </div>
+
+  <!-- Main panel -->
+  <div style="display:grid;grid-template-columns:340px 1fr;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 210px);min-height:560px;">
+
+    <!-- ── Left sidebar ── -->
+    <div style="background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+
+      <!-- Location prompt -->
+      <div id="doctorsLocBox" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;text-align:center;">
+        <div style="width:60px;height:60px;border-radius:18px;background:var(--red-soft);border:1px solid rgba(229,85,85,.25);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:22px;">📍</div>
+        <div style="font-family:var(--font-serif);font-size:22px;margin-bottom:10px;color:var(--text);line-height:1.2;">Find Care Near You</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:26px;">Allow location access to show cardiologists, hospitals, and clinics within 15 km on a live map.</div>
+        <button id="doctorsLocBtn" onclick="requestDoctorsLocation()" class="predict-btn" style="margin:0;padding:12px 30px;font-size:13px;border-radius:40px;letter-spacing:.02em;">
+          📍 &nbsp;Allow Location
+        </button>
+        <div id="doctorsLocError" style="display:none;margin-top:18px;padding:11px 14px;background:var(--red-soft);border:1px solid rgba(229,85,85,.22);border-radius:var(--radius-sm);font-size:12px;color:var(--red);line-height:1.65;text-align:left;width:100%;"></div>
+      </div>
+
+      <!-- Filter chips (visible after location) -->
+      <div id="doctorsFilters" style="display:none;padding:12px 14px;border-bottom:1px solid var(--border);gap:6px;flex-wrap:wrap;">
+        <button class="doc-chip active" data-cat="all"          onclick="filterDoctors('all')">All</button>
+        <button class="doc-chip"        data-cat="cardiologist" onclick="filterDoctors('cardiologist')">❤️ Cardio</button>
+        <button class="doc-chip"        data-cat="hospital"     onclick="filterDoctors('hospital')">🏥 Hospital</button>
+        <button class="doc-chip"        data-cat="clinic"       onclick="filterDoctors('clinic')">🩺 Clinic</button>
+      </div>
+
+      <!-- Count bar -->
+      <div id="doctorsCount" style="display:none;padding:8px 16px;font-size:11px;color:var(--text3);border-bottom:1px solid var(--border);font-weight:600;text-transform:uppercase;letter-spacing:.07em;background:var(--bg2);"></div>
+
+      <!-- Results list -->
+      <div id="doctorsList" style="flex:1;overflow-y:auto;"></div>
+    </div>
+
+    <!-- ── Map ── -->
+    <div style="position:relative;">
+      <div id="doctorsMapPlaceholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:16px;z-index:1;pointer-events:none;background:var(--bg3);">
+        <div style="font-size:68px;opacity:.1;">🗺️</div>
+        <div style="font-size:13px;letter-spacing:.02em;">Map appears after location access</div>
+      </div>
+      <div id="doctorsMap" style="width:100%;height:100%;"></div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.doc-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.doc-legend-item span {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.doc-chip {
+  padding: 5px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.doc-chip:hover { border-color: var(--red); color: var(--red); }
+.doc-chip.active { background: var(--red-soft); border-color: rgba(229,85,85,.4); color: var(--red); font-weight: 600; }
+.doc-card {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .12s;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-left: 3px solid transparent;
+}
+.doc-card:hover { background: var(--bg3); }
+.doc-card.active { background: var(--bg3); border-left-color: var(--red); }
+.doc-card:last-child { border-bottom: none; }
+.doc-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0; margin-top: 1px;
+}
+.doc-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.35; margin-bottom: 2px; }
+.doc-type { font-size: 11px; font-weight: 500; margin-bottom: 5px; }
+.doc-meta { font-size: 11px; color: var(--text3); line-height: 1.8; }
+.doc-dist { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-top: 3px; white-space: nowrap; }
+</style>

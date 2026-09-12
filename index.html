@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dr. Cat — Heart Disease Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --card: #1e2230;
+    --card2: #242838;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --text3: #555d70;
+    --red: #e55;
+    --red-soft: rgba(229,85,85,0.12);
+    --blue: #4a9eff;
+    --blue-soft: rgba(74,158,255,0.12);
+    --green: #3ecf8e;
+    --green-soft: rgba(62,207,142,0.1);
+    --amber: #f5a623;
+    --amber-soft: rgba(245,166,35,0.1);
+    --teal: #2dd4bf;
+    --accent: #e55;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --font: 'DM Sans', sans-serif;
+    --font-serif: 'DM Serif Display', serif;
+  }
+
+  /* Light theme overrides — applied when `body` has the class `light-theme` */
+  body.light-theme {
+    --bg: #f7f8fb;
+    --bg2: #ffffff;
+    --bg3: #f2f4f8;
+    --card: #ffffff;
+    --card2: #fbfdff;
+    --border: rgba(15,23,42,0.06);
+    --border2: rgba(15,23,42,0.04);
+    --text: #0f1724;
+    --text2: #4b5563;
+    --text3: #6b7280;
+    --red-soft: rgba(229,85,85,0.08);
+    --blue-soft: rgba(74,158,255,0.08);
+  }
+
+  /* Theme toggle button in sidebar */
+  .theme-toggle {
+    margin: 18px 24px 0 24px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text2);
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    border: 1px solid transparent;
+    transition: all .15s ease;
+  }
+  .theme-toggle:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+
+  /* Sidebar footer image */
+  .sidebar-footer { margin-top: auto; padding: 18px 24px; text-align: center; }
+  .sidebar-footer img { width: 220px; max-width: 100%; height: auto; border-radius: 0; box-shadow: none; display:block; margin: 0 auto; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ─── LAYOUT ─── */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 28px 0;
+    z-index: 100;
+  }
+  .logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .logo-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    color: var(--text);
+    letter-spacing: -.3px;
+  }
+  
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: .04em; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 24px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all .18s;
+    margin: 1px 0;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
+  .nav-item.active { color: var(--text); border-left-color: var(--red); background: rgba(229,85,85,.06); }
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+
+  .main { margin-left: 220px; padding: 36px 40px; min-height: 100vh; }
+
+  /* ─── SECTIONS ─── */
+  .section { display: none; animation: fadeIn .25s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  .page-header { margin-bottom: 32px; }
+  .page-title { font-family: var(--font-serif); font-size: 32px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text2); }
+
+  /* ─── UPLOAD ─── */
+  .upload-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 60px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--bg2);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--red); background: rgba(229,85,85,.04); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 48px; margin-bottom: 16px; }
+  .upload-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+  .upload-hint { font-size: 13px; color: var(--text2); }
+  .upload-btn {
+    display: inline-block; margin-top: 20px;
+    padding: 10px 28px; border-radius: 40px;
+    background: var(--red); color: #fff;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none;
+    transition: opacity .15s;
+  }
+  .upload-btn:hover { opacity: .85; }
+
+  .upload-status {
+    margin-top: 20px; padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px; display: none;
+  }
+  .upload-status.success { background: var(--green-soft); color: var(--green); border: 1px solid rgba(62,207,142,.2); }
+  .upload-status.error   { background: var(--red-soft); color: var(--red); border: 1px solid rgba(229,85,85,.2); }
+
+  .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 40px; }
+  .info-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .info-card h4 { font-size: 13px; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
+  .col-tag {
+    display: inline-block; padding: 3px 10px;
+    background: var(--bg3); border-radius: 4px;
+    font-size: 11px; color: var(--text2);
+    margin: 2px; font-family: monospace;
+  }
+  .col-tag.target { color: var(--red); background: var(--red-soft); }
+
+  /* ─── METRICS ─── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+  .metric-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+  .metric-val { font-size: 30px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-sub { font-size: 12px; color: var(--text2); margin-top: 6px; }
+  .metric-bar { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 14px; }
+  .metric-fill { height: 100%; border-radius: 2px; }
+
+  .charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .charts-row3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 20px; }
+
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px;
+  }
+  .chart-card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ─── STATS TABLE ─── */
+  .risk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .risk-table th { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; text-align: left; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .risk-table td { padding: 11px 0; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  .risk-table tr:last-child td { border: none; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+  .badge-h { background: var(--red-soft); color: var(--red); }
+  .badge-m { background: var(--amber-soft); color: var(--amber); }
+  .badge-l { background: var(--green-soft); color: var(--green); }
+
+  /* ─── PREDICT ─── */
+  .predict-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .predict-form { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+  .predict-result { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+
+  .form-section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin: 20px 0 14px; }
+  .form-section-title:first-child { margin-top: 0; }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .field input, .field select {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 9px 13px;
+    font-size: 13px;
+    font-family: var(--font);
+    outline: none;
+    transition: border-color .15s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--red); }
+  .field select option { background: #1a1e28; }
+
+  .predict-btn {
+    width: 100%; margin-top: 22px; padding: 13px;
+    background: var(--red); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+    font-family: var(--font);
+    letter-spacing: .02em;
+  }
+  .predict-btn:hover { opacity: .85; }
+  .predict-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Result panel */
+  .result-placeholder {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; min-height: 300px;
+    color: var(--text3); text-align: center; gap: 12px;
+  }
+  .result-placeholder-icon { font-size: 48px; opacity: .4; }
+
+  .result-panel { display: none; }
+  .result-panel.show { display: block; animation: fadeIn .3s ease; }
+
+  .risk-gauge {
+    text-align: center; padding: 30px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 22px;
+  }
+  .risk-number { font-family: var(--font-serif); font-size: 64px; font-weight: 400; line-height: 1; }
+  .risk-label-big { font-size: 16px; font-weight: 600; margin-top: 8px; }
+  .risk-desc { font-size: 12px; color: var(--text2); margin-top: 6px; }
+
+  .risk-bar-wrap { background: var(--bg3); border-radius: 6px; height: 8px; margin: 16px 0; overflow: hidden; }
+  .risk-bar-fill { height: 100%; border-radius: 6px; transition: width .6s ease; }
+
+  .feat-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
+  .feat-bar-bg { flex: 1; margin: 0 12px; height: 4px; background: var(--bg3); border-radius: 3px; }
+  .feat-bar { height: 100%; background: var(--blue); border-radius: 3px; }
+  .feat-pct { color: var(--text2); min-width: 38px; text-align: right; }
+
+  /* ─── LOADING ─── */
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.2);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .6s linear infinite; display: inline-block;
+    vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── NO DATA ─── */
+  .no-data {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 80px 20px;
+    color: var(--text3); text-align: center; gap: 14px;
+  }
+  .no-data-icon { font-size: 52px; opacity: .3; }
+  .no-data p { font-size: 14px; max-width: 320px; line-height: 1.6; }
+  .no-data-btn {
+    padding: 10px 24px; border-radius: 40px;
+    background: transparent; border: 1px solid var(--border2);
+    color: var(--text2); font-size: 13px; cursor: pointer;
+    transition: all .15s; font-family: var(--font);
+  }
+  .no-data-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* ─── ACCURACY BADGE ─── */
+  .acc-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px;
+    background: var(--green-soft); color: var(--green);
+    font-size: 12px; font-weight: 600;
+    border: 1px solid rgba(62,207,142,.2);
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar-root" class="sidebar">
+  <!-- sidebar partial will be loaded here -->
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div id="section-root"><!-- section partials mount here --></div>
+</main>
+
+<script>
+// Loader (synchronous XHR) — loads HTML partials into mount points before the main script runs
+(function(){
+  function loadSync(url){
+    try{
+      var req = new XMLHttpRequest();
+      req.open('GET', url, false); // synchronous
+      req.send(null);
+      if (req.status === 200 || req.status === 0) return req.responseText;
+    } catch(e){}
+    return '';
+  }
+  try{
+    var sidebar = loadSync('heart_dashboard/frontend/partials/sidebar.html');
+    if (sidebar) document.getElementById('sidebar-root').innerHTML = sidebar;
+
+    var parts = [
+      loadSync('heart_dashboard/frontend/partials/upload.html'),
+      loadSync('heart_dashboard/frontend/partials/dashboard.html'),
+      loadSync('heart_dashboard/frontend/partials/predict.html'),
+      loadSync('heart_dashboard/frontend/partials/articles.html')
+    ];
+    document.getElementById('section-root').innerHTML = parts.join('\n');
+
+    // Fix image paths inside injected partials: partials use data-src="assets/..." so we can
+    // build the correct base depending on which HTML page is hosting the partials.
+    var basePath = window.location.pathname.indexOf('/heart_dashboard/frontend/') !== -1 ? '' : 'heart_dashboard/frontend/';
+    document.querySelectorAll('#sidebar-root img[data-src]').forEach(function(img){
+      try {
+        var ds = img.getAttribute('data-src');
+        var primary = basePath + ds;
+        var alt = (basePath === '' ? 'heart_dashboard/frontend/' + ds : ds);
+        img.src = primary;
+        img.onerror = function(){ img.onerror = null; img.src = alt; };
+      } catch(e){}
+    });
+  } catch(e) { console.error('Partial load failed', e); }
+})();
+</script>
+
+<script>
+/* Theme handling: apply saved preference (localStorage) and wire toggle */
+function setTheme(isLight) {
+  if (isLight) {
+    document.body.classList.add('light-theme');
+    document.getElementById('themeToggle').textContent = '☀ Light';
+    document.getElementById('themeToggle').title = 'Switch to dark mode';
+  } else {
+    document.body.classList.remove('light-theme');
+    document.getElementById('themeToggle').textContent = '🌙 Night';
+    document.getElementById('themeToggle').title = 'Switch to light mode';
+  }
+}
+
+function toggleTheme() {
+  const isLight = !document.body.classList.contains('light-theme');
+  setTheme(isLight);
+  try { localStorage.setItem('cardiosense_theme_light', isLight ? '1' : '0'); } catch(e){}
+}
+
+// Initialize theme from localStorage
+try {
+  const saved = localStorage.getItem('cardiosense_theme_light');
+  setTheme(saved === '1');
+} catch(e){}
+
+const API = 'http://localhost:5001/api';
+let charts = {};
+let statsData = null;
+
+// ─── NAVIGATION ───
+function nav(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const sec = el.dataset.section;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  if (sec === 'dashboard' && statsData) renderDashboard(statsData);
+}
+
+// ─── UPLOAD ───
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+function showStatus(msg, type) {
+  const el = document.getElementById('uploadStatus');
+  el.textContent = msg; el.className = 'upload-status ' + type; el.style.display = 'block';
+}
+
+async function handleFile(file) {
+  if (!file) return;
+  showStatus('⏳ Uploading and training model...', 'success');
+  const fd = new FormData(); fd.append('file', file);
+  try {
+    const res = await fetch(API+'/upload', { method:'POST', body:fd });
+    const data = await res.json();
+    if (data.error) { showStatus('✗ '+data.error, 'error'); return; }
+    statsData = data.stats;
+    showStatus(`✓ Dataset loaded — ${data.stats.total} patients · Model accuracy: ${data.stats.model_accuracy}%`, 'success');
+    enableSections();
+  } catch(e) {
+    showStatus('✗ Could not connect to backend. Make sure the Flask server is running on port 5001.', 'error');
+  }
+}
+
+function enableSections() {
+  document.getElementById('dash-no-data').style.display = 'none';
+  document.getElementById('dash-content').style.display = 'block';
+  document.getElementById('predict-no-data').style.display = 'none';
+  document.getElementById('predict-content').style.display = 'block';
+  if (statsData) {
+    document.getElementById('accBadge').style.display = 'flex';
+    document.getElementById('accVal').textContent = statsData.model_accuracy;
+  }
+}
+
+// ─── DASHBOARD ───
+function renderDashboard(s) {
+  document.getElementById('dash-sub').textContent = `${s.total} patients · ${s.disease} with heart disease (${s.disease_pct}%)`;
+
+  // Metrics
+  document.getElementById('metricsGrid').innerHTML = `
+    ${metric('Total patients', s.total, 'rows in dataset', '#4a9eff', 100)}
+    ${metric('Heart disease', s.disease_pct+'%', `${s.disease} of ${s.total} patients`, '#e55', s.disease_pct)}
+    ${metric('Avg cholesterol', s.avg_chol+' mg/dL', 'population average', '#f5a623', Math.min(s.avg_chol/400*100,100).toFixed(0))}
+    ${metric('Max heart rate', s.avg_thalach+' bpm', 'average thalach', '#3ecf8e', Math.min(s.avg_thalach/200*100,100).toFixed(0))}
+  `;
+
+  // Charts
+  makeChart('ageChart', 'bar', {
+    labels: s.age_chart.labels,
+    datasets: [
+      { label:'Heart disease', data:s.age_chart.disease, backgroundColor:'#e55', borderRadius:5 },
+      { label:'No disease',    data:s.age_chart.no_disease, backgroundColor:'#4a9eff', borderRadius:5 }
+    ]
+  }, { indexAxis:'x', plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11}}}} });
+
+  makeChart('donutChart', 'doughnut', {
+    labels:['Heart disease','No disease'],
+    datasets:[{ data:[s.disease, s.no_disease], backgroundColor:['#e55','#4a9eff'], borderWidth:0, hoverOffset:8 }]
+  }, { cutout:'60%', plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b90a0',font:{size:11},boxWidth:10,padding:16}}} });
+
+  makeChart('cpChart', 'bar', {
+    labels: s.cp_chart.labels,
+    datasets:[{ data:s.cp_chart.counts, backgroundColor:['#e55','#f5a623','#4a9eff','#3ecf8e'], borderRadius:5 }]
+  }, { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11}}}} });
+
+  makeChart('sexChart', 'bar', {
+    labels:['Male','Female'],
+    datasets:[{ label:'Disease rate %', data:[s.male_disease_rate, s.female_disease_rate], backgroundColor:['#4a9eff','#e55'], borderRadius:6 }]
+  }, { plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toFixed(1)+'%'}}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:11}}},y:{max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11},callback:v=>v+'%'}}} });
+
+  makeChart('oldpeakChart', 'bar', {
+    labels:['Disease','No Disease'],
+    datasets:[{ data:[s.op_disease, s.op_no_disease], backgroundColor:['#e55','#4a9eff'], borderRadius:6 }]
+  }, { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#555d70',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#555d70',font:{size:11}}}} });
+
+  // Risk table
+  document.getElementById('riskTableBody').innerHTML = `
+    <tr><td>Avg resting blood pressure</td><td>${s.avg_trestbps} mmHg</td><td>Stage 1 hypertension ≥130 mmHg</td><td>${badge(s.avg_trestbps >= 130 ? 'High' : s.avg_trestbps >= 120 ? 'Medium' : 'Low')}</td></tr>
+    <tr><td>Avg cholesterol</td><td>${s.avg_chol} mg/dL</td><td>Borderline high &gt;200 mg/dL</td><td>${badge(s.avg_chol > 240 ? 'High' : s.avg_chol > 200 ? 'Medium' : 'Low')}</td></tr>
+    <tr><td>Female heart disease rate</td><td>${s.female_disease_rate}%</td><td>Compared to male ${s.male_disease_rate}%</td><td>${badge(s.female_disease_rate > 65 ? 'High' : s.female_disease_rate > 45 ? 'Medium' : 'Low')}</td></tr>
+    <tr><td>Fasting blood sugar &gt;120</td><td>${s.fbs_positive} patients</td><td>${((s.fbs_positive/s.total)*100).toFixed(1)}% of dataset — diabetic risk</td><td>${badge(s.fbs_positive/s.total > .15 ? 'Medium' : 'Low')}</td></tr>
+    <tr><td>ST depression — disease group</td><td>${s.op_disease} vs ${s.op_no_disease}</td><td>Lower in disease group (paradox)</td><td><span class="badge badge-m">Medium</span></td></tr>
+  `;
+}
+
+function metric(label, val, sub, color, pct) {
+  return `<div class="metric-card">
+    <div class="metric-label">${label}</div>
+    <div class="metric-val">${val}</div>
+    <div class="metric-sub">${sub}</div>
+    <div class="metric-bar"><div class="metric-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+
+function badge(level) {
+  const cls = level === 'High' ? 'h' : level === 'Medium' ? 'm' : 'l';
+  return `<span class="badge badge-${cls}">${level}</span>`;
+}
+
+function makeChart(id, type, data, opts={}) {
+  if (charts[id]) { charts[id].destroy(); }
+  const defaults = { responsive:true, maintainAspectRatio:false };
+  charts[id] = new Chart(document.getElementById(id), {
+    type, data,
+    options: { ...defaults, ...opts, plugins: { legend:{display:false}, ...opts.plugins } }
+  });
+}
+
+// ─── PREDICT ───
+const FIELDS = ['age','sex','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','slope','ca','thal'];
+
+async function runPredict() {
+  const btn = document.getElementById('predictBtn');
+  const payload = {};
+  
+  // Define valid ranges for numeric fields
+  const fieldRanges = {
+    'age': { min: 18, max: 120 },
+    'trestbps': { min: 70, max: 250 },
+    'chol': { min: 100, max: 600 },
+    'thalach': { min: 40, max: 250 },
+    'oldpeak': { min: 0, max: 6.2 }
+  };
+  
+  for (const f of FIELDS) {
+    const el = document.getElementById('f-'+f);
+    if (!el || el.value === '') {
+      alert(`Please fill in all fields. Missing: ${f}`); return;
+    }
+    const value = parseFloat(el.value);
+    
+    // Validate numeric ranges
+    if (fieldRanges[f]) {
+      const range = fieldRanges[f];
+      if (value < range.min || value > range.max) {
+        alert(`Invalid ${f}: must be between ${range.min} and ${range.max}. You entered: ${value}`);
+        el.focus();
+        return;
+      }
+    }
+    
+    payload[f] = value;
+  }
+  
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Analysing...';
+  try {
+    const res = await fetch(API+'/predict', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.error) { alert('Error: '+data.error); return; }
+    showResult(data);
+    try { generateAiReport(data, payload); } catch(e) { /* ignore if AI unavailable */ }
+  } catch(e) {
+    alert('Could not connect to backend. Ensure Flask is running on port 5001.');
+  }
+  btn.disabled = false; btn.innerHTML = 'Analyse Patient Risk';
+}
+
+function showResult(data) {
+  document.getElementById('resultPlaceholder').style.display = 'none';
+  const panel = document.getElementById('resultPanel');
+  panel.style.display = 'block'; panel.classList.add('show');
+
+  const isDisease = data.prediction === 1;
+  const color = data.risk_level === 'High' ? '#e55' : data.risk_level === 'Medium' ? '#f5a623' : '#3ecf8e';
+
+  document.getElementById('riskGauge').innerHTML = `
+    <div class="risk-number" style="color:${color}">${data.risk_pct}%</div>
+    <div class="risk-label-big" style="color:${color}">${data.risk_level} Risk — ${isDisease ? 'Heart Disease Likely' : 'No Disease Detected'}</div>
+    <div class="risk-desc">The model predicts ${isDisease ? 'presence' : 'absence'} of heart disease with ${data.risk_pct}% confidence.</div>
+    <div class="risk-bar-wrap">
+      <div class="risk-bar-fill" style="width:${data.risk_pct}%;background:${color}"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px">
+      <span>No Disease ${data.no_disease_pct}%</span>
+      <span>Disease ${data.risk_pct}%</span>
+    </div>
+  `;
+
+  const maxImp = Math.max(...data.top_features.map(f=>f.importance));
+  document.getElementById('featImportance').innerHTML = data.top_features.map(f => `
+    <div class="feat-item">
+      <span style="min-width:80px;color:var(--text2)">${f.name}</span>
+      <div class="feat-bar-bg"><div class="feat-bar" style="width:${(f.importance/maxImp*100).toFixed(0)}%"></div></div>
+      <span class="feat-pct">${f.importance}%</span>
+    </div>
+  `).join('');
+}
+
+let lastAiReport = '';
+
+async function generateAiReport(data, patientFields) {
+  const card = document.getElementById('aiReportCard');
+  const loading = document.getElementById('aiLoading');
+  const preview = document.getElementById('aiPreview');
+  const previewText = document.getElementById('aiPreviewText');
+  const buttonsContainer = document.getElementById('aiButtonsContainer');
+  const chip = document.getElementById('aiRiskChip');
+
+  if(!card) return;
+  card.style.display = 'block';
+  loading.style.display = 'flex';
+  preview.style.display = 'none';
+  buttonsContainer.style.display = 'none';
+
+  const chipColor = data.risk_level === 'High' ? 'var(--red)' : data.risk_level === 'Medium' ? 'var(--amber)' : 'var(--green)';
+  const chipBg = data.risk_level === 'High' ? 'var(--red-soft)' : data.risk_level === 'Medium' ? 'var(--amber-soft)' : 'var(--green-soft)';
+  chip.style.color = chipColor;
+  chip.style.background = chipBg;
+  chip.textContent = `● ${data.risk_level} Risk`;
+
+  const featNames = { age:'Age', sex:'Sex', cp:'Chest pain type', trestbps:'Resting BP', chol:'Cholesterol',
+    fbs:'Fasting blood sugar', restecg:'Resting ECG', thalach:'Max heart rate', exang:'Exercise angina',
+    oldpeak:'ST depression', slope:'ST slope', ca:'Major vessels', thal:'Thalassemia' };
+
+  const topFeatures = (data.top_features||[]).map(f => `${featNames[f.name] || f.name} (${f.importance}% weight)`).join(', ');
+  const patientSummary = Object.entries(patientFields)
+    .map(([k, v]) => `${featNames[k] || k}: ${v}`).join(', ');
+
+  const prompt = `You are a clinical decision support AI assisting cardiologists. A machine learning model has assessed a patient for heart disease risk.\n\nPatient data: ${patientSummary}\n\nModel result: ${data.risk_level} risk — ${data.risk_pct}% probability of heart disease.\nTop contributing features: ${topFeatures}\n\nWrite a concise clinical report with three short sections:\n1. Clinical Overview: (2-3 sentences summarising the patient profile and prediction)\n2. Key Risk Drivers: (bullet points explaining what each top feature means clinically)\n3. Recommended Actions: (3-4 specific clinical next steps)\n\nBe precise and medically appropriate. Do not use markdown headers — use plain text with the section names followed by a colon.`;
+
+  try {
+    const res = await fetch(API + '/ai-report', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    const j = await res.json();
+    const text = j.text || j.error || 'Report unavailable.';
+    lastAiReport = text;
+    loading.style.display = 'none';
+    
+    // Show preview (truncated)
+    const previewLength = 250;
+    const displayText = text.length > previewLength ? text.substring(0, previewLength) + '...' : text;
+    previewText.textContent = displayText;
+    preview.style.display = 'block';
+    buttonsContainer.style.display = 'flex';
+  } catch (e) {
+    loading.style.display = 'none';
+    previewText.textContent = 'Could not generate AI report. Ensure your Groq API key is configured on the server.';
+    preview.style.display = 'block';
+  }
+}
+
+function openAiModal() {
+  if (!lastAiReport) return;
+  const modal = document.getElementById('aiModal');
+  const content = document.getElementById('aiModalContent');
+  content.textContent = lastAiReport;
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAiModal() {
+  const modal = document.getElementById('aiModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function copyAiReport() {
+  if (!lastAiReport) return;
+  navigator.clipboard.writeText(lastAiReport);
+  const btn = event.target;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+function copyAiReportFromModal() {
+  if (!lastAiReport) return;
+  navigator.clipboard.writeText(lastAiReport);
+  const btn = event.target;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy Report', 2000);
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+  const modal = document.getElementById('aiModal');
+  if (modal && event.target === modal) {
+    closeAiModal();
+  }
+});
+
+// Check backend on load
+(async () => {
+  try {
+    const r = await fetch(API+'/health');
+    const d = await r.json();
+    if (d.dataset_loaded) {
+      const sr = await fetch(API+'/stats');
+      statsData = await sr.json();
+      enableSections();
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>

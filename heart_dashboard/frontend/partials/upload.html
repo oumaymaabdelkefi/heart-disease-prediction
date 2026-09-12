@@ -1,0 +1,45 @@
+<section class="section" id="sec-upload">
+  <div class="page-header">
+    <h1 class="page-title">Upload your dataset</h1>
+    <p class="page-sub">Accepts CSV files with standard Heart Disease column schema.</p>
+  </div>
+
+  <div class="upload-zone" id="dropZone">
+    <input type="file" accept=".csv" id="fileInput" onchange="handleFile(this.files[0])" />
+    <div class="upload-icon">🫀</div>
+    <div class="upload-title">Drop your CSV file here</div>
+    <div class="upload-hint">or click to browse — must include all 14 clinical features</div>
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+  </div>
+  <div class="upload-status" id="uploadStatus"></div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Required columns</h4>
+      <span class="col-tag">age</span><span class="col-tag">sex</span><span class="col-tag">cp</span>
+      <span class="col-tag">trestbps</span><span class="col-tag">chol</span><span class="col-tag">fbs</span>
+      <span class="col-tag">restecg</span><span class="col-tag">thalach</span><span class="col-tag">exang</span>
+      <span class="col-tag">oldpeak</span><span class="col-tag">slope</span><span class="col-tag">ca</span>
+      <span class="col-tag">thal</span><span class="col-tag target">target</span>
+    </div>
+    <div class="info-card">
+      <h4>Model details</h4>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7">
+        Random Forest Classifier · 150 estimators · StandardScaler normalization ·
+        80/20 train-test split · Auto-trained on upload.
+      </p>
+    </div>
+    <div class="info-card">
+      <h4>Column reference</h4>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8">
+        cp: chest pain type (0–3)<br>
+        trestbps: resting blood pressure<br>
+        fbs: fasting blood sugar &gt;120<br>
+        thalach: max heart rate<br>
+        exang: exercise-induced angina<br>
+        oldpeak: ST depression<br>
+        target: 0 = no disease, 1 = disease
+      </p>
+    </div>
+  </div>
+</section>

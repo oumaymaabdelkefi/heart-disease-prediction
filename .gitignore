@@ -1,0 +1,28 @@
+# Secrets — never commit
+.env
+.env.local
+*.key
+
+# Python
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+._*
+__MACOSX/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Models / build artifacts
+*.pkl
+*.joblib

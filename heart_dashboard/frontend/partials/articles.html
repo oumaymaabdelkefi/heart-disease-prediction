@@ -1,0 +1,482 @@
+<section class="section" id="sec-articles">
+  <div class="page-header">
+    <h1 class="page-title">Heart Health Articles</h1>
+    <p class="page-sub" id="articlesSub">45 peer-reviewed articles — run a prediction to get personalised recommendations.</p>
+  </div>
+
+  <div id="recBanner" style="display:none;margin-bottom:24px;background:var(--blue-soft);border:1px solid rgba(74,158,255,.22);border-radius:var(--radius);padding:16px 20px;align-items:center;gap:14px;">
+    <span style="font-size:20px;flex-shrink:0;">🎯</span>
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;">Personalised recommendations active</div>
+      <div style="font-size:12px;color:var(--text2);" id="recBannerText"></div>
+    </div>
+    <button onclick="clearArticleRec()" style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:var(--font);">Clear filter</button>
+  </div>
+
+  <div id="reapplyBanner" style="display:none;margin-bottom:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;align-items:center;gap:14px;">
+    <span style="font-size:16px;flex-shrink:0;opacity:.5;">🎯</span>
+    <div style="flex:1;font-size:12px;color:var(--text3);">Recommendations cleared — last prediction results still available.</div>
+    <button onclick="reapplyArticleRec()" style="font-size:11px;color:var(--blue);background:var(--blue-soft);border:1px solid rgba(74,158,255,.22);border-radius:6px;padding:5px 14px;cursor:pointer;font-family:var(--font);font-weight:600;">Reapply recommendations</button>
+  </div>
+
+  <div id="recSection" style="display:none;margin-bottom:32px;">
+    <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;">Recommended for this patient</div>
+    <div id="recList" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;"></div>
+  </div>
+
+  <div id="allLabel" style="display:none;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;">All articles</div>
+
+  <div id="mainArticleList" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;">
+
+    <div class="art-card">
+      <div class="art-title">LDL-C Reduction and Atherosclerotic Cardiovascular Events: Updated Systematic Review and Meta-Analysis</div>
+      <div class="art-summary">Reviews statin and non-statin therapies for cholesterol lowering and their impact on reducing coronary events in high-risk populations.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet Cardiology</span><span class="art-year">2024</span>
+        <span class="art-tag">Cholesterol</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Antihypertensive Therapy and Major Cardiovascular Events: Individual Patient Data Meta-Analysis</div>
+      <div class="art-summary">Demonstrates that blood pressure reduction significantly lowers stroke, MI, and heart failure risk across all baseline BP levels above 130 mmHg.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2025</span>
+        <span class="art-tag">Resting BP</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Exercise-Induced ST Depression: Diagnostic Accuracy for Obstructive Coronary Artery Disease</div>
+      <div class="art-summary">Evaluates the sensitivity and specificity of ST-segment changes during stress testing for detecting haemodynamically significant coronary stenosis.</div>
+      <div class="art-footer">
+        <span class="art-journal">J Am Coll Cardiol</span><span class="art-year">2025</span>
+        <span class="art-tag">ST Depression</span><span class="art-tag">Exercise Angina</span>
+        <a class="art-link" href="https://www.jacc.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Stable Angina and Exercise Limitation: Pathophysiology and Current Treatment Strategies</div>
+      <div class="art-summary">Covers the mechanisms of exercise-induced chest pain, triage of angina types, and evidence-based medical and interventional management.</div>
+      <div class="art-footer">
+        <span class="art-journal">Circulation</span><span class="art-year">2025</span>
+        <span class="art-tag">Chest Pain</span><span class="art-tag">Exercise Angina</span>
+        <a class="art-link" href="https://www.ahajournals.org/journal/circ" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Coronary Artery Disease Severity by Angiography and Long-Term Cardiovascular Mortality</div>
+      <div class="art-summary">Large cohort study linking the number of obstructed major vessels to 10-year mortality, informing revascularisation decision thresholds.</div>
+      <div class="art-footer">
+        <span class="art-journal">Eur Heart J</span><span class="art-year">2025</span>
+        <span class="art-tag">Major Vessels</span><span class="art-tag">High Risk</span>
+        <a class="art-link" href="https://academic.oup.com/eurheartj" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Cardiac Complications in Thalassemia: MRI Surveillance, Iron Chelation, and Outcomes</div>
+      <div class="art-summary">Longitudinal analysis of cardiac iron loading in thalassaemia patients and efficacy of chelation therapy in preventing cardiomyopathy and heart failure.</div>
+      <div class="art-footer">
+        <span class="art-journal">Blood</span><span class="art-year">2024</span>
+        <span class="art-tag">Thalassemia</span><span class="art-tag">Heart Failure</span>
+        <a class="art-link" href="https://ashpublications.org/blood" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Fasting Hyperglycaemia as an Independent Predictor of Cardiovascular Events in Non-Diabetic Adults</div>
+      <div class="art-summary">Prospective cohort demonstrating that fasting blood sugar above 100 mg/dL, even below the diabetic threshold, independently elevates 10-year cardiac risk.</div>
+      <div class="art-footer">
+        <span class="art-journal">Diabetes Care</span><span class="art-year">2025</span>
+        <span class="art-tag">Blood Sugar</span><span class="art-tag">High Risk</span>
+        <a class="art-link" href="https://diabetesjournals.org/care" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Age-Specific Cardiovascular Risk Stratification: Biomarkers, Thresholds, and Clinical Decision Making</div>
+      <div class="art-summary">Proposes revised risk calculators that account for age-dependent biomarker thresholds, improving prediction accuracy in patients over 55 and under 45.</div>
+      <div class="art-footer">
+        <span class="art-journal">JAMA Cardiology</span><span class="art-year">2025</span>
+        <span class="art-tag">Age</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://jamanetwork.com/journals/jamacardiology" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Sex Disparities in Coronary Heart Disease Presentation, Diagnosis, and Outcomes</div>
+      <div class="art-summary">Reviews how symptoms, risk factors, and treatment responses differ between men and women, highlighting under-diagnosis of CAD in female patients.</div>
+      <div class="art-footer">
+        <span class="art-journal">Eur Heart J</span><span class="art-year">2025</span>
+        <span class="art-tag">Sex</span><span class="art-tag">Chest Pain</span>
+        <a class="art-link" href="https://academic.oup.com/eurheartj" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Prevention of Heart Failure in High-Risk Patients: Pharmacological and Lifestyle Strategies</div>
+      <div class="art-summary">Comprehensive review of SGLT2 inhibitors, ACE inhibitors, and targeted lifestyle interventions in patients at elevated risk of developing heart failure.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2024</span>
+        <span class="art-tag">Heart Failure</span><span class="art-tag">High Risk</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Resting ECG Abnormalities and Risk of Major Adverse Cardiovascular Events in Asymptomatic Adults</div>
+      <div class="art-summary">Population-based study linking resting ECG findings — LVH, ST changes, bundle branch blocks — to incident MI and arrhythmia over a 12-year follow-up.</div>
+      <div class="art-footer">
+        <span class="art-journal">JAMA</span><span class="art-year">2024</span>
+        <span class="art-tag">ECG Result</span><span class="art-tag">Age</span>
+        <a class="art-link" href="https://jamanetwork.com/journals/jama" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Supervised Cardiac Rehabilitation: Exercise Capacity, Mortality, and Hospital Readmission</div>
+      <div class="art-summary">Meta-analysis of 63 RCTs showing that structured rehabilitation programmes reduce all-cause mortality by 26% and cardiac readmission by 31%.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet</span><span class="art-year">2025</span>
+        <span class="art-tag">Exercise Angina</span><span class="art-tag">Heart Failure</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Mediterranean and DASH Dietary Patterns and Incident Cardiovascular Disease: A 20-Year Cohort</div>
+      <div class="art-summary">Long-term cohort confirming that adherence to Mediterranean or DASH diets reduces CHD incidence by 28–34% independently of medication.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM Evidence</span><span class="art-year">2025</span>
+        <span class="art-tag">Prevention</span><span class="art-tag">Cholesterol</span>
+        <a class="art-link" href="https://evidence.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Peak Exercise Heart Rate as a Predictor of Cardiovascular and All-Cause Mortality</div>
+      <div class="art-summary">Analysis of 85 000 stress tests showing chronotropic incompetence — failure to reach 85% predicted max heart rate — is a strong independent mortality predictor.</div>
+      <div class="art-footer">
+        <span class="art-journal">Circulation</span><span class="art-year">2025</span>
+        <span class="art-tag">Max Heart Rate</span><span class="art-tag">High Risk</span>
+        <a class="art-link" href="https://www.ahajournals.org/journal/circ" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Hereditary Cardiac Syndromes: Cascade Genetic Screening and Long-Term Risk Stratification</div>
+      <div class="art-summary">Demonstrates that cascade screening of first-degree relatives of patients with hereditary cardiac conditions yields a 1-in-4 diagnosis rate and improves outcomes.</div>
+      <div class="art-footer">
+        <span class="art-journal">Nature Medicine</span><span class="art-year">2024</span>
+        <span class="art-tag">Thalassemia</span><span class="art-tag">Major Vessels</span>
+        <a class="art-link" href="https://www.nature.com/nm/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">SGLT2 Inhibitors and Cardiovascular Outcomes: Evidence Beyond Glycaemic Control</div>
+      <div class="art-summary">Landmark trials confirm SGLT2 inhibitors reduce hospitalisation for heart failure and cardiovascular death in both diabetic and non-diabetic patients with elevated cardiac risk.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2025</span>
+        <span class="art-tag">Blood Sugar</span><span class="art-tag">Heart Failure</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Atrial Fibrillation Detection, Stroke Risk, and Anticoagulation: Updated Clinical Practice Guidelines</div>
+      <div class="art-summary">Consensus guidelines on ECG-based AF screening in adults over 65, stroke risk stratification using CHA₂DS₂-VASc, and evidence for direct oral anticoagulant therapy.</div>
+      <div class="art-footer">
+        <span class="art-journal">JAMA</span><span class="art-year">2025</span>
+        <span class="art-tag">ECG Result</span><span class="art-tag">Age</span>
+        <a class="art-link" href="https://jamanetwork.com/journals/jama" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Coronary Artery Calcium Scoring for Primary Prevention: Who Benefits Most?</div>
+      <div class="art-summary">Prospective data showing that CAC scoring reclassifies risk in 25% of intermediate-risk patients and guides statin initiation more accurately than traditional risk calculators.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet</span><span class="art-year">2025</span>
+        <span class="art-tag">Major Vessels</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Hypertrophic Cardiomyopathy: Diagnosis, Sudden Death Risk Stratification, and Emerging Therapies</div>
+      <div class="art-summary">Comprehensive review of HCM pathophysiology, risk factors for sudden cardiac death, and the efficacy of mavacamten and surgical septal reduction in obstructive disease.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2024</span>
+        <span class="art-tag">Max Heart Rate</span><span class="art-tag">Chest Pain</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Omega-3 Fatty Acids and Residual Cardiovascular Risk After Statin Therapy</div>
+      <div class="art-summary">Re-analysis of REDUCE-IT and STRENGTH trials clarifying which patient subgroups derive meaningful benefit from high-dose icosapentaenoic acid supplementation.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM Evidence</span><span class="art-year">2025</span>
+        <span class="art-tag">Cholesterol</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://evidence.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Smoking Cessation and Rapid Reversal of Cardiovascular Risk: A 10-Year Prospective Analysis</div>
+      <div class="art-summary">Demonstrates that within two years of smoking cessation, cardiovascular event risk falls by 39%, approaching never-smoker levels within a decade regardless of pack-year history.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet</span><span class="art-year">2024</span>
+        <span class="art-tag">Prevention</span><span class="art-tag">Resting BP</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Exercise Intensity, Volume, and Cardiovascular Mortality: Dose-Response Across 100,000 Adults</div>
+      <div class="art-summary">Large prospective cohort establishing optimal exercise thresholds — 150–300 min/week of moderate activity — and showing diminishing returns but no harm at very high volumes.</div>
+      <div class="art-footer">
+        <span class="art-journal">JAMA Cardiology</span><span class="art-year">2025</span>
+        <span class="art-tag">Max Heart Rate</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://jamanetwork.com/journals/jamacardiology" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Obstructive Sleep Apnoea, Nocturnal Hypertension, and Incident Cardiovascular Disease</div>
+      <div class="art-summary">Longitudinal study linking untreated OSA severity to nocturnal blood pressure surges, atrial fibrillation burden, and 40% higher incidence of major cardiac events.</div>
+      <div class="art-footer">
+        <span class="art-journal">Circulation</span><span class="art-year">2025</span>
+        <span class="art-tag">Resting BP</span><span class="art-tag">ECG Result</span>
+        <a class="art-link" href="https://www.ahajournals.org/journal/circ" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Sex-Specific Mechanisms in Ischaemic Heart Disease: Microvascular Disease and MINOCA</div>
+      <div class="art-summary">Reviews the pathophysiology of myocardial infarction with non-obstructive coronary arteries (MINOCA), which disproportionately affects women and is frequently misdiagnosed.</div>
+      <div class="art-footer">
+        <span class="art-journal">Eur Heart J</span><span class="art-year">2025</span>
+        <span class="art-tag">Sex</span><span class="art-tag">Chest Pain</span>
+        <a class="art-link" href="https://academic.oup.com/eurheartj" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Iron Deficiency in Heart Failure: Intravenous Repletion and Quality-of-Life Outcomes</div>
+      <div class="art-summary">AFFIRM-AHF follow-up data showing IV ferric carboxymaltose reduces HF hospitalisations by 26% in iron-deficient patients regardless of anaemia status.</div>
+      <div class="art-footer">
+        <span class="art-journal">Eur Heart J</span><span class="art-year">2025</span>
+        <span class="art-tag">Heart Failure</span><span class="art-tag">Thalassemia</span>
+        <a class="art-link" href="https://academic.oup.com/eurheartj" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Aortic Stenosis Progression and Optimal Timing for Valve Replacement</div>
+      <div class="art-summary">Natural history study of asymptomatic severe AS demonstrating that early intervention reduces mortality compared to watchful waiting once mean gradient exceeds 40 mmHg.</div>
+      <div class="art-footer">
+        <span class="art-journal">J Am Coll Cardiol</span><span class="art-year">2024</span>
+        <span class="art-tag">Chest Pain</span><span class="art-tag">ST Depression</span>
+        <a class="art-link" href="https://www.jacc.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Cardiac CT Angiography vs. Functional Stress Testing in Stable Chest Pain: ISCHAEMIA Extension</div>
+      <div class="art-summary">Extended follow-up confirming CTA-guided management identifies more obstructive disease but does not reduce death or MI compared to optimal medical therapy alone in stable CAD.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2025</span>
+        <span class="art-tag">Major Vessels</span><span class="art-tag">Chest Pain</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Polypharmacy in Elderly Patients with Heart Failure: Deprescribing Strategies and Outcomes</div>
+      <div class="art-summary">Randomised trial of structured deprescribing in HF patients over 75 — reducing pill burden by 30% without worsening outcomes and significantly improving adherence to therapy.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet</span><span class="art-year">2025</span>
+        <span class="art-tag">Age</span><span class="art-tag">Heart Failure</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Depression, Psychological Stress, and Incident Coronary Artery Disease: Mechanistic Insights</div>
+      <div class="art-summary">Meta-analysis of 22 cohorts demonstrating that major depression confers a 1.6-fold increase in incident CAD, mediated through HPA axis dysregulation and platelet hyper-reactivity.</div>
+      <div class="art-footer">
+        <span class="art-journal">JAMA</span><span class="art-year">2024</span>
+        <span class="art-tag">Prevention</span><span class="art-tag">Sex</span>
+        <a class="art-link" href="https://jamanetwork.com/journals/jama" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Resistant Hypertension: Prevalence, Mechanisms, and Renal Denervation Evidence</div>
+      <div class="art-summary">Review of true versus pseudo-resistant hypertension, the role of aldosterone excess, and updated trial data on catheter-based renal denervation as adjunct therapy.</div>
+      <div class="art-footer">
+        <span class="art-journal">Circulation</span><span class="art-year">2025</span>
+        <span class="art-tag">Resting BP</span><span class="art-tag">Major Vessels</span>
+        <a class="art-link" href="https://www.ahajournals.org/journal/circ" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Inherited Arrhythmia Syndromes: Long QT, Brugada, and CPVT — Genetics to Clinical Management</div>
+      <div class="art-summary">Clinical genomics review covering genotype-phenotype correlations, risk stratification for sudden death, and ICD versus pharmacological management in inherited channelopathies.</div>
+      <div class="art-footer">
+        <span class="art-journal">Nature Medicine</span><span class="art-year">2025</span>
+        <span class="art-tag">ECG Result</span><span class="art-tag">Thalassemia</span>
+        <a class="art-link" href="https://www.nature.com/nm/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Dual Antiplatelet Therapy Duration After PCI: Personalising the Benefit-Risk Trade-off</div>
+      <div class="art-summary">Individual patient data meta-analysis enabling risk scoring to determine optimal DAPT duration (6 vs. 12 vs. 24 months) after percutaneous coronary intervention.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2025</span>
+        <span class="art-tag">Major Vessels</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Type 2 Diabetes, Coronary Microvascular Disease, and Diastolic Dysfunction</div>
+      <div class="art-summary">Mechanistic study linking chronic hyperglycaemia to coronary microvascular dysfunction, impaired myocardial perfusion reserve, and early HFpEF in diabetic patients.</div>
+      <div class="art-footer">
+        <span class="art-journal">Diabetes Care</span><span class="art-year">2025</span>
+        <span class="art-tag">Blood Sugar</span><span class="art-tag">Heart Failure</span>
+        <a class="art-link" href="https://diabetesjournals.org/care" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Visceral Obesity, Metabolic Syndrome, and Accelerated Coronary Atherosclerosis</div>
+      <div class="art-summary">Imaging study showing visceral fat area is a stronger predictor of non-calcified plaque burden than BMI, and that weight loss of ≥10% significantly slows plaque progression.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet Diabetes Endocrinology</span><span class="art-year">2025</span>
+        <span class="art-tag">Cholesterol</span><span class="art-tag">Resting BP</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Remote Patient Monitoring and Telemetry in Chronic Heart Failure: A Randomised Trial</div>
+      <div class="art-summary">Implantable haemodynamic monitoring with physician-guided medication titration reduces HF hospitalisation by 37% compared to standard outpatient follow-up over 18 months.</div>
+      <div class="art-footer">
+        <span class="art-journal">Eur Heart J</span><span class="art-year">2025</span>
+        <span class="art-tag">Heart Failure</span><span class="art-tag">Resting BP</span>
+        <a class="art-link" href="https://academic.oup.com/eurheartj" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">GLP-1 Receptor Agonists and Major Adverse Cardiovascular Events: Class-Wide Meta-Analysis</div>
+      <div class="art-summary">Pooled analysis of LEADER, SUSTAIN-6, REWIND, and AMPLITUDE-O confirming GLP-1 agonists reduce MACE by 14% and HF hospitalisation by 11% in high-risk patients regardless of baseline HbA1c.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2025</span>
+        <span class="art-tag">Blood Sugar</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Transcatheter vs. Surgical Aortic Valve Replacement: 5-Year Outcomes Across Risk Strata</div>
+      <div class="art-summary">Extended PARTNER 3 and Evolut Low Risk data showing TAVR is non-inferior to surgery for all-cause mortality at five years across low-, intermediate-, and high-risk surgical candidates.</div>
+      <div class="art-footer">
+        <span class="art-journal">J Am Coll Cardiol</span><span class="art-year">2025</span>
+        <span class="art-tag">Chest Pain</span><span class="art-tag">Age</span>
+        <a class="art-link" href="https://www.jacc.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">High-Sensitivity Troponin for Early Rule-Out of Acute MI: Diagnostic Accuracy and Clinical Pathways</div>
+      <div class="art-summary">Prospective validation of 0h/1h and 0h/2h hs-cTnI algorithms achieving 99.0% negative predictive value for NSTEMI, enabling safe early discharge for 60% of chest pain presentations.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet</span><span class="art-year">2025</span>
+        <span class="art-tag">Chest Pain</span><span class="art-tag">High Risk</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">High-Sensitivity CRP, Inflammation, and Residual Cardiovascular Risk Beyond LDL-C</div>
+      <div class="art-summary">CANTOS and RESCUE trial data establishing hsCRP >2 mg/L as an independent therapeutic target; colchicine and IL-6 inhibition reduce recurrent events beyond maximum statin therapy.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM Evidence</span><span class="art-year">2025</span>
+        <span class="art-tag">Prevention</span><span class="art-tag">Cholesterol</span>
+        <a class="art-link" href="https://evidence.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Cardiac Rehabilitation After Acute MI: Long-Term Adherence, Exercise Capacity, and Survival</div>
+      <div class="art-summary">Registry data from 47 000 post-MI patients showing each additional week of supervised rehabilitation independently reduces five-year mortality by 3.5%, with greatest benefit in reduced ejection fraction.</div>
+      <div class="art-footer">
+        <span class="art-journal">Circulation</span><span class="art-year">2025</span>
+        <span class="art-tag">Max Heart Rate</span><span class="art-tag">Prevention</span>
+        <a class="art-link" href="https://www.ahajournals.org/journal/circ" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Myocarditis in Young Athletes: Incidence, Clinical Course, and Return-to-Play Protocols</div>
+      <div class="art-summary">Multi-centre registry documenting clinical presentation, CMR characterisation, and structured return-to-play guidance for competitive athletes with biopsy-confirmed or CMR-diagnosed myocarditis.</div>
+      <div class="art-footer">
+        <span class="art-journal">JAMA Cardiology</span><span class="art-year">2024</span>
+        <span class="art-tag">Max Heart Rate</span><span class="art-tag">ECG Result</span>
+        <a class="art-link" href="https://jamanetwork.com/journals/jamacardiology" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Vasospastic Angina: Pathophysiology, Provocation Testing, and Calcium Channel Blocker Therapy</div>
+      <div class="art-summary">Comprehensive review of coronary artery vasospasm mechanisms, ergonovine and acetylcholine provocation protocols, and evidence for high-dose CCB therapy in reducing recurrent spasm.</div>
+      <div class="art-footer">
+        <span class="art-journal">Eur Heart J</span><span class="art-year">2025</span>
+        <span class="art-tag">Chest Pain</span><span class="art-tag">Exercise Angina</span>
+        <a class="art-link" href="https://academic.oup.com/eurheartj" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">NT-proBNP-Guided Therapy in Heart Failure with Reduced Ejection Fraction</div>
+      <div class="art-summary">GUIDE-IT and PRIMA trial synthesis demonstrating that biomarker-guided titration of neurohormonal antagonists reduces HF hospitalisation by 20% compared to symptom-guided care alone.</div>
+      <div class="art-footer">
+        <span class="art-journal">Lancet</span><span class="art-year">2024</span>
+        <span class="art-tag">Heart Failure</span><span class="art-tag">Age</span>
+        <a class="art-link" href="https://www.thelancet.com/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Mitral Regurgitation: Percutaneous Edge-to-Edge Repair vs. Medical Management in HFrEF</div>
+      <div class="art-summary">COAPT 3-year data confirming MitraClip reduces HF hospitalisation by 47% and all-cause mortality by 38% in secondary MR patients on maximally-tolerated guideline-directed therapy.</div>
+      <div class="art-footer">
+        <span class="art-journal">NEJM</span><span class="art-year">2025</span>
+        <span class="art-tag">Heart Failure</span><span class="art-tag">Chest Pain</span>
+        <a class="art-link" href="https://www.nejm.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+    <div class="art-card">
+      <div class="art-title">Hyperkalaemia in Heart Failure: Potassium Binders Enabling Optimisation of RAAS Therapy</div>
+      <div class="art-summary">AMBER and DIAMOND trial evidence showing patiromer and SZC allow continued and up-titrated ACEi/ARB/MRA therapy in HF patients previously discontinued due to hyperkalaemia, improving survival.</div>
+      <div class="art-footer">
+        <span class="art-journal">J Am Coll Cardiol</span><span class="art-year">2025</span>
+        <span class="art-tag">Heart Failure</span><span class="art-tag">ECG Result</span>
+        <a class="art-link" href="https://www.jacc.org/" target="_blank" rel="noopener">⤴</a>
+      </div>
+    </div>
+
+  </div>
+</section>

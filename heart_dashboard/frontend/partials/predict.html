@@ -1,0 +1,188 @@
+<section class="section" id="sec-predict">
+  <div class="page-header">
+    <h1 class="page-title">Patient Prediction</h1>
+    <p class="page-sub">Enter a new patient's clinical data to assess heart disease risk.</p>
+  </div>
+  <div id="predict-no-data" class="no-data">
+    <div class="no-data-icon">◎</div>
+    <p>No model trained yet. Upload a dataset first to enable predictions.</p>
+    <button class="no-data-btn" onclick="nav(document.querySelector('[data-section=upload]'))">Go to Upload</button>
+  </div>
+  <div id="predict-content" style="display:none">
+    <div class="predict-layout">
+      <div class="predict-form">
+        <div class="chart-card-title" style="margin-bottom:18px">Patient information</div>
+
+        <div class="form-section-title">Demographics</div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Age (years)</label>
+            <input type="number" id="f-age" placeholder="18 – 120" min="18" max="120" oninput="validateInput(this)" />
+          </div>
+          <div class="field">
+            <label>Sex</label>
+            <select id="f-sex">
+              <option value="">Select...</option>
+              <option value="1">Male</option>
+              <option value="0">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section-title">Cardiac measurements</div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Chest pain type</label>
+            <select id="f-cp">
+              <option value="">Select...</option>
+              <option value="0">0 – Typical angina</option>
+              <option value="1">1 – Atypical angina</option>
+              <option value="2">2 – Non-anginal pain</option>
+              <option value="3">3 – Asymptomatic</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Resting BP (mmHg)</label>
+            <input type="number" id="f-trestbps" placeholder="70 – 250" min="70" max="250" oninput="validateInput(this)" />
+          </div>
+          <div class="field">
+            <label>Cholesterol (mg/dL)</label>
+            <input type="number" id="f-chol" placeholder="100 – 600" min="100" max="600" oninput="validateInput(this)" />
+          </div>
+          <div class="field">
+            <label>Fasting blood sugar &gt;120</label>
+            <select id="f-fbs">
+              <option value="">Select...</option>
+              <option value="1">Yes (&gt;120 mg/dL)</option>
+              <option value="0">No (≤120 mg/dL)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Resting ECG</label>
+            <select id="f-restecg">
+              <option value="">Select...</option>
+              <option value="0">0 – Normal</option>
+              <option value="1">1 – ST-T abnormality</option>
+              <option value="2">2 – LV hypertrophy</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Max heart rate (bpm)</label>
+            <input type="number" id="f-thalach" placeholder="40 – 250" min="40" max="250" oninput="validateInput(this)" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Stress test results</div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Exercise-induced angina</label>
+            <select id="f-exang">
+              <option value="">Select...</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ST depression (oldpeak)</label>
+            <input type="number" id="f-oldpeak" placeholder="0.0 – 6.2" min="0" max="6.2" step="0.1" oninput="validateInput(this)" />
+          </div>
+          <div class="field">
+            <label>Slope of ST segment</label>
+            <select id="f-slope">
+              <option value="">Select...</option>
+              <option value="0">0 – Upsloping</option>
+              <option value="1">1 – Flat</option>
+              <option value="2">2 – Downsloping</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Major vessels (0–3)</label>
+            <select id="f-ca">
+              <option value="">Select...</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Thalassemia</label>
+            <select id="f-thal">
+              <option value="">Select...</option>
+              <option value="1">1 – Normal</option>
+              <option value="2">2 – Fixed defect</option>
+              <option value="3">3 – Reversible defect</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="predict-btn" id="predictBtn" onclick="runPredict()">Analyse Patient Risk</button>
+      </div>
+
+      <div class="predict-result">
+        <div class="result-placeholder" id="resultPlaceholder">
+          <div class="result-placeholder-icon">🫀</div>
+          <p style="font-size:13px;color:var(--text3)">Fill in patient data and click analyse to see the risk assessment.</p>
+        </div>
+        <div class="result-panel" id="resultPanel">
+          <div class="risk-gauge" id="riskGauge"></div>
+          <div class="chart-card-title">Top contributing features</div>
+          <div id="featImportance" style="margin-top:12px"></div>
+          <!-- AI Clinical Report Preview Card -->
+          <div class="ai-report-card" id="aiReportCard" style="display:none; margin-top:20px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:0">
+              <span style="background:var(--blue-soft); color:var(--blue); font-size:11px; font-weight:600; padding:3px 9px; border-radius:99px; letter-spacing:.05em">AI</span>
+              <span style="font-size:14px; font-weight:500">Clinical report</span>
+              <span id="aiRiskChip" style="margin-left:auto; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:600"></span>
+            </div>
+            <div id="aiLoading" style="display:flex; align-items:center; gap:10px; padding:8px 0 0 0;">
+              <div style="display:flex;gap:5px" id="aiDots">
+                <div style="width:7px;height:7px;border-radius:50%;background:var(--blue);animation:aiPulse 1.2s infinite"></div>
+                <div style="width:7px;height:7px;border-radius:50%;background:var(--blue);animation:aiPulse 1.2s .2s infinite"></div>
+                <div style="width:7px;height:7px;border-radius:50%;background:var(--blue);animation:aiPulse 1.2s .4s infinite"></div>
+              </div>
+              <span style="font-size:13px; color:var(--text2)">Generating clinical report...</span>
+            </div>
+            <div id="aiPreview" style="display:none; font-size:13px; line-height:1.6; color:var(--text2); white-space:pre-wrap; max-height:120px; overflow:hidden; position:relative; margin-top:8px; margin-bottom:8px">
+              <div id="aiPreviewText"></div>
+              <div style="position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(to bottom, transparent, var(--card))"></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:12px" id="aiButtonsContainer" style="display:none">
+              <button style="padding:7px 16px; background:var(--blue); color:white; border:none; border-radius:var(--radius-sm); font-size:12px; cursor:pointer; font-weight:600" onclick="openAiModal()">View Full Report</button>
+              <button style="padding:7px 16px; background:transparent; border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text2); font-size:12px; cursor:pointer" onclick="copyAiReport()">Copy</button>
+            </div>
+          </div>
+
+          <style>
+          @keyframes aiPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+          </style>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI Report Modal -->
+<div id="aiModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; overflow:auto; padding:40px 20px">
+  <div style="background:var(--card); border-radius:var(--radius); max-width:700px; margin:0 auto; min-height:400px; box-shadow:0 10px 40px rgba(0,0,0,0.3); display:flex; flex-direction:column">
+    <!-- Modal Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:24px; border-bottom:1px solid var(--border)">
+      <div style="display:flex; align-items:center; gap:12px">
+        <span style="background:var(--blue-soft); color:var(--blue); font-size:11px; font-weight:600; padding:4px 10px; border-radius:99px; letter-spacing:.05em">AI</span>
+        <span style="font-size:16px; font-weight:600">Clinical Report</span>
+      </div>
+      <button onclick="closeAiModal()" style="background:none; border:none; font-size:24px; color:var(--text2); cursor:pointer; padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center">×</button>
+    </div>
+    <!-- Modal Content -->
+    <div id="aiModalContent" style="flex:1; overflow-y:auto; padding:24px; font-size:14px; line-height:1.75; color:var(--text2); white-space:pre-wrap"></div>
+    <!-- Modal Footer -->
+    <div style="display:flex; gap:12px; padding:24px; border-top:1px solid var(--border); background:var(--bg2)">
+      <div style="font-size:11px; color:var(--text3); flex:1; align-self:center">
+        This report is AI-generated for clinical decision support only. Always verify with a licensed cardiologist.
+      </div>
+      <button onclick="copyAiReportFromModal()" style="padding:8px 18px; background:var(--blue); color:white; border:none; border-radius:var(--radius-sm); font-size:12px; cursor:pointer; font-weight:600">Copy Report</button>
+      <button onclick="closeAiModal()" style="padding:8px 18px; background:transparent; border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text2); font-size:12px; cursor:pointer">Close</button>
+    </div>
+  </div>
+</section>
+
