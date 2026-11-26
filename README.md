@@ -20,7 +20,7 @@ The **dashboard** (`heart_dashboard/`) is the application: a Flask API that trai
 
 ```
 heart-disease-prediction/
-├── index.html                      # Root launcher
+├── index.html                      # Redirects to heart_dashboard/frontend/
 ├── data/
 │   ├── heart.csv                   # Raw dataset (1,025 records)
 │   ├── heart_cleaned.csv           # Deduplicated (302 unique records)
@@ -32,7 +32,7 @@ heart-disease-prediction/
     │   └── .env.example
     └── frontend/
         ├── index.html
-        ├── partials/               # home · dashboard · predict · upload · articles · doctors · sidebar
+        ├── partials/               # home · dashboard · predict · drift · upload · articles · doctors · sidebar
         └── assets/
 ```
 
@@ -110,7 +110,7 @@ Serve the repo root over HTTP. Opening the file directly via `file://` will fail
 python -m http.server 8080
 ```
 
-Open <http://localhost:8080>, go to the **Upload** tab, and upload `data/heart_cleaned.csv`. The backend trains a Random Forest on it immediately and the dashboard and prediction tabs come alive.
+Open <http://localhost:8080> (it redirects to `heart_dashboard/frontend/`), accept the notice on Home, go to the **Upload** tab, and upload `data/heart_cleaned.csv`. The backend trains a Random Forest on it immediately and the Dashboard, Predict and Drift Monitor tabs unlock.
 
 ### Notebook
 
@@ -131,6 +131,9 @@ Base URL `http://localhost:5001`
 | GET | `/api/stats` | Aggregate statistics for the dashboard |
 | POST | `/api/predict` | Risk prediction for one patient |
 | GET | `/api/health` | Server status, whether a dataset is loaded |
+| GET | `/api/drift/scenarios` | Available simulated shifts |
+| POST | `/api/drift/simulate` | Stream simulated batches with a gradual shift, test each for drift |
+| POST | `/api/drift/check` | Test an uploaded CSV batch (13 feature columns) against the training data |
 | POST | `/api/ai-report` | Groq-backed narrative report (optional) |
 
 **`POST /api/predict`**
@@ -166,6 +169,49 @@ cp .env.example .env      # then paste your key from console.groq.com/keys
 ```
 
 `.env` is gitignored. Keep it that way.
+
+---
+
+## Drift monitoring
+
+A model is only as good as the match between the data it was trained on and the data it now sees. The **Drift Monitor** tab checks that match.
+
+**Reference.** The training split (80% of the uploaded dataset) is the reference distribution: the population the model actually learned.
+
+**Tests, per feature, per batch.**
+
+| Feature type | Features | Test |
+|---|---|---|
+| Continuous | age, trestbps, chol, thalach, oldpeak | Two-sample Kolmogorov–Smirnov |
+| Categorical | sex, cp, fbs, restecg, exang, slope, ca, thal | Chi-square test of homogeneity |
+| All | — | Population Stability Index (PSI) as the effect size |
+
+A feature is flagged only when **both** hold:
+- **Significant.** p < 0.05 / 13 (Bonferroni). Without the correction, running 13 tests at α = 0.05 raises a false alarm on about half of all clean batches.
+- **Material.** PSI ≥ 0.1. This keeps large batches from alarming on differences too small to matter. PSI ≥ 0.25 counts as major drift.
+
+**Prediction drift.** The monitor also runs a KS test on the model's predicted risk, reference vs batch. It flags drift when p < 0.01 and the mean predicted risk has moved by at least 5 points. This catches shifts that are spread thinly across many features, so no single feature test fires, but the model's output still moves. The `case_mix` scenario is an example.
+
+**Simulation.** Twelve batches are bootstrapped from the reference population. The first few are clean. From the chosen onset batch, a shift ramps up to the selected intensity:
+
+| Scenario | What changes |
+|---|---|
+| `aging` | Age +10 y; max heart rate falls accordingly (≈0.7 bpm/year) |
+| `cholesterol` | Cholesterol readings ×1.25 (e.g. a new lab assay) |
+| `bp_sensor` | Resting BP +18 mmHg (miscalibrated cuff) |
+| `female` | Patient mix skews heavily female (covariate shift) |
+| `case_mix` | Referrals skew toward sick patients (prior/label shift) |
+
+The dashboard shows:
+- an overall verdict, plus how many batches passed between the shift starting and the first alert;
+- the number of drifted features per batch;
+- mean predicted risk per batch, against the reference;
+- a per-feature table of statistic, p-value, PSI and means;
+- a reference-vs-current histogram for any feature you click.
+
+**Check a real batch** runs the same tests on a CSV you upload.
+
+**Validation.** 900 clean batches were simulated (30 seeds × batch sizes 60/150/500). The monitor raised 5 false alarms, about 0.6%. Every scenario at full intensity was detected 0–3 batches after the shift began.
 
 ---
 

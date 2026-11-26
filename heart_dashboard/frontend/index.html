@@ -40,6 +40,8 @@
         --radius-sm: 8px;
         --font: "DM Sans", sans-serif;
         --font-serif: "DM Serif Display", serif;
+        --series-ref: #4a9eff;
+        --series-cur: #e24d8b;
       }
 
       /* Light theme overrides — applied when `body` has the class `light-theme` */
@@ -56,6 +58,8 @@
         --text3: #6b7280;
         --red-soft: rgba(229, 85, 85, 0.08);
         --blue-soft: rgba(74, 158, 255, 0.08);
+        --series-ref: #257de0;
+        --series-cur: #e0558f;
       }
 
       /* Theme toggle button in sidebar */
@@ -683,6 +687,54 @@
         color: var(--red);
       }
 
+      /* ─── DRIFT MONITOR ─── */
+      .drift-controls {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr 1fr 1fr auto auto;
+        gap: 16px;
+        align-items: end;
+        margin-bottom: 16px;
+      }
+      .drift-controls .field input[type="range"] {
+        padding: 0;
+        accent-color: var(--red);
+        -webkit-appearance: auto;
+        appearance: auto;
+        height: 36px;
+      }
+      .drift-run { width: auto; margin-top: 0; padding: 10px 20px; }
+      .drift-upload { display: inline-block; white-space: nowrap; }
+      .drift-banner {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 20px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .drift-banner .drift-icon { font-size: 20px; font-weight: 700; }
+      .drift-banner.stable { background: var(--green-soft); }
+      .drift-banner.stable .drift-icon { color: var(--green); }
+      .drift-banner.moderate { background: var(--amber-soft); }
+      .drift-banner.moderate .drift-icon { color: var(--amber); }
+      .drift-banner.major { background: var(--red-soft); }
+      .drift-banner.major .drift-icon { color: var(--red); }
+      .drift-banner small { display: block; color: var(--text2); font-size: 12px; margin-top: 3px; }
+      .drift-table tbody tr { cursor: pointer; }
+      .drift-table tbody tr:hover td { background: var(--bg3); }
+      .drift-table tbody tr.selected td { background: var(--blue-soft); }
+      .drift-table td, .drift-table th { padding-left: 6px; padding-right: 6px; }
+      .drift-table td.num { font-variant-numeric: tabular-nums; }
+      .drift-note { font-size: 12px; color: var(--text3); margin-top: 12px; line-height: 1.6; }
+      .leg-line { width: 14px; height: 2px; border-radius: 1px; }
+      .leg-dash { width: 14px; height: 0; border-top: 2px dashed var(--text3); }
+      @media (max-width: 1100px) {
+        .drift-controls { grid-template-columns: 1fr 1fr; }
+      }
+
       /* ─── ACCURACY BADGE ─── */
       .acc-badge {
         display: inline-flex;
@@ -830,6 +882,7 @@
             "upload",
             "dashboard",
             "predict",
+            "drift",
             "articles",
             "doctors",
           ].forEach(function (name) {
@@ -887,6 +940,8 @@
         try {
           localStorage.setItem("cardiosense_theme_light", isLight ? "1" : "0");
         } catch (e) {}
+        // drift charts read theme colours at draw time, so redraw them
+        if (typeof driftState !== "undefined" && driftState) renderDrift();
       }
 
       // Initialize theme from localStorage
@@ -937,6 +992,10 @@
         const secEl = document.getElementById("sec-" + sec);
         if (secEl) secEl.classList.add("active");
         if (sec === "dashboard" && statsData) renderDashboard(statsData);
+        if (sec === "drift" && driftState && driftState.pendingRender) {
+          driftState.pendingRender = false;
+          renderDrift();
+        }
         if (sec === "doctors" && _doctorsMap)
           setTimeout(function () {
             _doctorsMap.invalidateSize();
@@ -948,7 +1007,7 @@
       var dataUploaded = false;
 
       function unlockDataSections() {
-        ["dashboard", "predict"].forEach(function (sec) {
+        ["dashboard", "predict", "drift"].forEach(function (sec) {
           var el = document.querySelector(
             '.nav-item[data-section="' + sec + '"]',
           );
@@ -980,7 +1039,7 @@
           };
           el.removeAttribute("title");
         });
-        ["dashboard", "predict"].forEach(function (sec) {
+        ["dashboard", "predict", "drift"].forEach(function (sec) {
           var el = document.querySelector(
             '.nav-item[data-section="' + sec + '"]',
           );
@@ -1065,6 +1124,7 @@
           }
           statsData = data.stats;
           dataUploaded = true;
+          resetDrift(); // new model -> new reference distribution
           showStatus(
             `✓ Dataset loaded — ${data.stats.total} patients · Model accuracy: ${data.stats.model_accuracy}%`,
             "success",
@@ -1089,6 +1149,9 @@
         document.getElementById("dash-content").style.display = "block";
         document.getElementById("predict-no-data").style.display = "none";
         document.getElementById("predict-content").style.display = "block";
+        document.getElementById("drift-no-data").style.display = "none";
+        document.getElementById("drift-content").style.display = "block";
+        loadDriftScenarios();
         unlockDataSections();
       }
 
@@ -1304,6 +1367,376 @@
             ...defaults,
             ...opts,
             plugins: { legend: { display: false }, ...opts.plugins },
+          },
+        });
+      }
+
+      // ─── DRIFT MONITOR ───
+      // Reference = the model's training split. Each batch is tested per feature
+      // (KS for continuous, chi-square for categorical, Bonferroni-corrected) plus
+      // PSI as effect size, and the model's predicted risk is checked for drift.
+      let driftState = null; // { mode: "stream"|"single", data, report, selected, pendingRender }
+      let driftScenariosLoaded = false;
+
+      const DRIFT_STATUS = {
+        stable: { icon: "✓", label: "Stable", cls: "l", color: "--green" },
+        moderate: { icon: "▲", label: "Moderate", cls: "m", color: "--amber" },
+        major: { icon: "✕", label: "Major", cls: "h", color: "--red" },
+      };
+
+      function _css(name) {
+        return getComputedStyle(document.body).getPropertyValue(name).trim();
+      }
+
+      async function loadDriftScenarios() {
+        if (driftScenariosLoaded) return;
+        try {
+          const r = await fetch(API + "/drift/scenarios");
+          const d = await r.json();
+          const sel = document.getElementById("drift-scenario");
+          sel.innerHTML = d.scenarios
+            .map((s) => `<option value="${s.id}">${_esc(s.label)}</option>`)
+            .join("");
+          sel.value = "aging";
+          driftScenariosLoaded = true;
+        } catch (e) {}
+      }
+
+      function resetDrift() {
+        driftState = null;
+        const res = document.getElementById("drift-results");
+        if (res) res.style.display = "none";
+        const st = document.getElementById("driftStatus");
+        if (st) st.className = "upload-status";
+      }
+
+      function _driftStatus(msg, type) {
+        const el = document.getElementById("driftStatus");
+        el.textContent = msg;
+        el.className = "upload-status " + (type || "success");
+      }
+
+      async function runDriftSimulation() {
+        const btn = document.getElementById("driftRunBtn");
+        const nBatches = 12;
+        const body = {
+          scenario: document.getElementById("drift-scenario").value || "aging",
+          intensity: +document.getElementById("drift-intensity").value / 100,
+          batch_size: +document.getElementById("drift-batch").value || 150,
+          n_batches: nBatches,
+          onset: Math.max(+document.getElementById("drift-onset").value - 1, 0),
+        };
+        btn.disabled = true;
+        btn.textContent = "Running…";
+        _driftStatus(`⏳ Streaming ${nBatches} batches of ${body.batch_size} patients…`);
+        try {
+          const r = await fetch(API + "/drift/simulate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const d = await r.json();
+          if (d.error) return _driftStatus("✗ " + d.error, "error");
+          document.getElementById("driftStatus").className = "upload-status";
+          driftState = { mode: "stream", data: d, report: d.latest, selected: null };
+          renderDrift();
+        } catch (e) {
+          _driftStatus("✗ Could not reach the backend.", "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Run simulation";
+        }
+      }
+
+      async function checkDriftFile(file) {
+        if (!file) return;
+        const fd = new FormData();
+        fd.append("file", file);
+        _driftStatus("⏳ Testing " + file.name + " against the training reference…");
+        try {
+          const r = await fetch(API + "/drift/check", { method: "POST", body: fd });
+          const d = await r.json();
+          if (d.error) return _driftStatus("✗ " + d.error, "error");
+          document.getElementById("driftStatus").className = "upload-status";
+          driftState = { mode: "single", data: { file: file.name }, report: d, selected: null };
+          renderDrift();
+        } catch (e) {
+          _driftStatus("✗ Could not reach the backend.", "error");
+        } finally {
+          document.getElementById("driftFile").value = "";
+        }
+      }
+
+      function renderDrift() {
+        if (!driftState) return;
+        const sec = document.getElementById("sec-drift");
+        if (!sec.classList.contains("active")) {
+          driftState.pendingRender = true; // charts need a visible canvas to size
+          return;
+        }
+        const { mode, data, report } = driftState;
+        document.getElementById("drift-results").style.display = "block";
+
+        // Banner — the headline answer
+        const st = DRIFT_STATUS[report.overall];
+        const pred = report.prediction;
+        let headline, detail;
+        if (report.overall === "stable") {
+          headline = "No drift detected in the latest batch";
+          detail = `All ${report.features.length} features match the training distribution at the corrected α = ${report.corrected_alpha}.`;
+        } else {
+          const feats = report.drifted_features.length
+            ? report.drifted_features.join(", ")
+            : "no single feature (shift is spread across many)";
+          headline = `${st.label} drift detected — ${feats}`;
+          detail = pred.drifted
+            ? `Model output has moved too: mean predicted risk ${pred.ref_mean_risk}% → ${pred.cur_mean_risk}%. Consider retraining or investigating the data source.`
+            : `Model output has not shifted materially yet (mean risk ${pred.ref_mean_risk}% → ${pred.cur_mean_risk}%). Investigate the data source.`;
+        }
+        if (mode === "stream") {
+          const onset = data.params.onset;
+          const fa = data.first_alert_batch;
+          if (!fa) detail += " The monitor never raised an alert during this stream.";
+          else if (fa < onset) detail += ` First alert at batch ${fa}, before the shift began (batch ${onset}) — a false alarm.`;
+          else detail += ` First alert at batch ${fa}; the shift began at batch ${onset} (${fa - onset} batch${fa - onset === 1 ? "" : "es"} detection delay).`;
+        }
+        const banner = document.getElementById("driftBanner");
+        banner.className = "drift-banner " + report.overall;
+        banner.innerHTML = `<span class="drift-icon">${st.icon}</span><div>${_esc(headline)}<small>${_esc(detail)}</small></div>`;
+
+        // Metrics row
+        const psiPct = Math.min((report.max_psi / 0.5) * 100, 100).toFixed(0);
+        const sign = pred.shift_pts > 0 ? "+" : "";
+        document.getElementById("driftMetrics").innerHTML = `
+          ${metric("Drifted features", `${report.n_drifted} / ${report.features.length}`, "significant and PSI ≥ 0.1", _css(st.color), (report.n_drifted / report.features.length) * 100)}
+          ${metric("Max PSI", report.max_psi, "< 0.1 stable · ≥ 0.25 major", _css(st.color), psiPct)}
+          ${metric("Mean predicted risk", pred.cur_mean_risk + "%", `reference ${pred.ref_mean_risk}% · Δ ${sign}${pred.shift_pts} pts`, _css("--series-cur"), pred.cur_mean_risk)}
+          ${metric("Batch size", report.n_rows, `vs ${report.n_reference} reference rows`, _css("--series-ref"), 100)}
+        `;
+
+        document.getElementById("drift-sub").textContent =
+          mode === "stream"
+            ? `Simulation: ${data.scenario_label} · ${data.params.n_batches} batches × ${data.params.batch_size} patients`
+            : `Checked file: ${data.file} · ${report.n_rows} patients`;
+
+        // Timeline charts only make sense for a stream
+        document.getElementById("driftTimelineRow").style.display =
+          mode === "stream" ? "grid" : "none";
+        if (mode === "stream") _renderDriftTimeline(data);
+
+        document.getElementById("driftTableTitle").textContent =
+          mode === "stream"
+            ? `Per-feature tests — latest batch (#${data.timeline.length})`
+            : "Per-feature tests";
+        if (!driftState.selected) driftState.selected = report.features[0].feature;
+        _renderDriftTable(report);
+        _renderDriftDist();
+      }
+
+      function _axisOpts() {
+        const tick = _css("--text2"), grid = _css("--border");
+        return {
+          ticks: { color: tick, font: { family: "DM Sans", size: 11 } },
+          grid: { color: grid },
+          border: { color: grid },
+        };
+      }
+
+      // Dashed vertical marker before the batch where the shift was injected
+      function _onsetPlugin(onsetIdx) {
+        return {
+          id: "onsetLine",
+          afterDatasetsDraw(chart) {
+            const xs = chart.scales.x;
+            if (onsetIdx == null || onsetIdx <= 0 || onsetIdx >= chart.data.labels.length) return;
+            const x = (xs.getPixelForValue(onsetIdx - 1) + xs.getPixelForValue(onsetIdx)) / 2;
+            const { top, bottom } = chart.chartArea;
+            const ctx = chart.ctx;
+            ctx.save();
+            ctx.strokeStyle = _css("--text3");
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(x, top);
+            ctx.lineTo(x, bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = _css("--text2");
+            ctx.font = "11px DM Sans";
+            ctx.fillText("shift starts", x + 4, top + 10);
+            ctx.restore();
+          },
+        };
+      }
+
+      function _renderDriftTimeline(d) {
+        const labels = d.timeline.map((t) => "#" + t.batch);
+        const onsetIdx = d.params.onset - 1;
+        const nFeat = d.latest.features.length;
+
+        if (charts.driftTimelineChart) charts.driftTimelineChart.destroy();
+        charts.driftTimelineChart = new Chart(document.getElementById("driftTimelineChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{
+              label: "Drifted features",
+              // a sliver for 0 so stable batches still show (and are hoverable)
+              data: d.timeline.map((t) => Math.max(t.n_drifted, 0.08)),
+              backgroundColor: d.timeline.map((t) => _css(DRIFT_STATUS[t.overall].color)),
+              borderRadius: 4,
+              borderSkipped: "start",
+              maxBarThickness: 28,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (it) => `Batch ${d.timeline[it[0].dataIndex].batch}`,
+                  label: (it) => {
+                    const t = d.timeline[it.dataIndex];
+                    const s = DRIFT_STATUS[t.overall];
+                    return [
+                      `${s.icon} ${s.label}`,
+                      `Drifted: ${t.n_drifted} / ${nFeat}${t.drifted_features.length ? " (" + t.drifted_features.join(", ") + ")" : ""}`,
+                      `Max PSI: ${t.max_psi}`,
+                      `Injected shift: ${Math.round(t.shift * 100)}%`,
+                    ];
+                  },
+                },
+              },
+            },
+            scales: {
+              x: _axisOpts(),
+              y: { ..._axisOpts(), beginAtZero: true, suggestedMax: 3,
+                   ticks: { ..._axisOpts().ticks, precision: 0, stepSize: 1 } },
+            },
+          },
+          plugins: [_onsetPlugin(onsetIdx)],
+        });
+
+        const refRisk = d.latest.prediction.ref_mean_risk;
+        if (charts.driftRiskChart) charts.driftRiskChart.destroy();
+        charts.driftRiskChart = new Chart(document.getElementById("driftRiskChart"), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Incoming batch",
+                data: d.timeline.map((t) => t.mean_risk),
+                borderColor: _css("--series-cur"),
+                backgroundColor: _css("--series-cur"),
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBorderColor: _css("--card"),
+                pointBorderWidth: 2,
+                tension: 0.25,
+              },
+              {
+                label: "Training reference",
+                data: labels.map(() => refRisk),
+                borderColor: _css("--text3"),
+                borderWidth: 1.5,
+                borderDash: [5, 4],
+                pointRadius: 0,
+                pointHoverRadius: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (it) => `Batch ${d.timeline[it[0].dataIndex].batch}`,
+                  label: (it) => `${it.dataset.label}: ${it.parsed.y}%`,
+                },
+              },
+            },
+            scales: {
+              x: _axisOpts(),
+              y: { ..._axisOpts(), suggestedMin: 30, suggestedMax: 90,
+                   ticks: { ..._axisOpts().ticks, callback: (v) => v + "%" } },
+            },
+          },
+          plugins: [_onsetPlugin(onsetIdx)],
+        });
+      }
+
+      function _fmtP(p) {
+        if (p === 0) return "< 1e-300";
+        return p < 0.001 ? p.toExponential(1) : p.toFixed(3);
+      }
+
+      function _renderDriftTable(report) {
+        const body = document.getElementById("driftTableBody");
+        body.innerHTML = report.features
+          .map((f) => {
+            const s = DRIFT_STATUS[f.status];
+            const sel = f.feature === driftState.selected ? "selected" : "";
+            return `<tr class="${sel}" data-feature="${f.feature}" onclick="selectDriftFeature(this.dataset.feature)">
+              <td><strong>${f.feature}</strong></td>
+              <td>${f.test}</td>
+              <td class="num">${f.statistic}</td>
+              <td class="num">${_fmtP(f.p_value)}${f.significant ? " *" : ""}</td>
+              <td class="num">${f.psi}</td>
+              <td class="num">${f.ref_mean} → ${f.cur_mean}</td>
+              <td><span class="badge badge-${s.cls}">${s.icon} ${s.label}</span></td>
+            </tr>`;
+          })
+          .join("");
+        const pr = report.prediction;
+        document.getElementById("driftNote").innerHTML =
+          `* p below the Bonferroni-corrected threshold α/${report.features.length} = ${report.corrected_alpha}. ` +
+          `A feature is flagged only if it is significant <em>and</em> PSI ≥ 0.1, so large batches don't alarm on trivial differences. ` +
+          `Prediction drift (KS on predicted risk): D = ${pr.ks}, p = ${_fmtP(pr.p_value)} — ${pr.drifted ? "<strong>drifted</strong>" : "not drifted"}.`;
+      }
+
+      function selectDriftFeature(name) {
+        driftState.selected = name;
+        document.querySelectorAll("#driftTableBody tr").forEach((tr) =>
+          tr.classList.toggle("selected", tr.dataset.feature === name));
+        _renderDriftDist();
+      }
+
+      function _renderDriftDist() {
+        const f = driftState.report.features.find((x) => x.feature === driftState.selected);
+        if (!f) return;
+        const s = DRIFT_STATUS[f.status];
+        document.getElementById("driftDistTitle").textContent =
+          `Distribution — ${f.feature} · ${s.icon} ${s.label} (PSI ${f.psi})`;
+        const surface = _css("--card");
+        const bar = (label, data, color) => ({
+          label, data, backgroundColor: color, borderRadius: 4, borderSkipped: "start",
+          borderColor: surface, borderWidth: { left: 1, right: 1 },
+        });
+        makeChart("driftDistChart", "bar", {
+          labels: f.hist.labels,
+          datasets: [
+            bar("Reference (training)", f.hist.reference, _css("--series-ref")),
+            bar("Current batch", f.hist.current, _css("--series-cur")),
+          ],
+        }, {
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            tooltip: { callbacks: {
+              title: (it) => `${f.feature}: ${it[0].label}`,
+              label: (it) => `${it.dataset.label}: ${it.parsed.y}%`,
+            } },
+          },
+          scales: {
+            x: { ..._axisOpts(), title: { display: true, text: f.test === "KS" ? "value range (reference deciles)" : "category", color: _css("--text3") } },
+            y: { ..._axisOpts(), beginAtZero: true, ticks: { ..._axisOpts().ticks, callback: (v) => v + "%" } },
           },
         });
       }

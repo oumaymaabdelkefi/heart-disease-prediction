@@ -1,0 +1,94 @@
+<section class="section" id="sec-drift">
+  <div class="page-header">
+    <h1 class="page-title">Drift Monitor</h1>
+    <p class="page-sub" id="drift-sub">
+      Is incoming patient data still drawn from the population the model was trained on?
+    </p>
+  </div>
+
+  <div id="drift-no-data" class="no-data">
+    <div class="no-data-icon">📈</div>
+    <p>No model trained yet. Upload a dataset first — its training split becomes the reference distribution.</p>
+    <button class="no-data-btn" onclick="nav(document.querySelector('[data-section=upload]'))">Go to Upload</button>
+  </div>
+
+  <div id="drift-content" style="display:none">
+    <!-- Controls: one row above the charts -->
+    <div class="chart-card drift-controls">
+      <div class="field">
+        <label for="drift-scenario">Simulated shift</label>
+        <select id="drift-scenario"></select>
+      </div>
+      <div class="field">
+        <label for="drift-intensity">Intensity <span id="drift-intensity-val">100%</span></label>
+        <input type="range" id="drift-intensity" min="0" max="100" step="10" value="100"
+               oninput="document.getElementById('drift-intensity-val').textContent=this.value+'%'" />
+      </div>
+      <div class="field">
+        <label for="drift-batch">Patients per batch</label>
+        <input type="number" id="drift-batch" min="30" max="2000" value="150" />
+      </div>
+      <div class="field">
+        <label for="drift-onset">Shift starts at batch</label>
+        <input type="number" id="drift-onset" min="1" max="12" value="5" />
+      </div>
+      <button class="predict-btn drift-run" id="driftRunBtn" onclick="runDriftSimulation()">Run simulation</button>
+      <label class="no-data-btn drift-upload" title="CSV with the 13 feature columns (target optional)">
+        Check a real batch…
+        <input type="file" accept=".csv" id="driftFile" onchange="checkDriftFile(this.files[0])" hidden />
+      </label>
+    </div>
+    <div class="upload-status" id="driftStatus"></div>
+
+    <div id="drift-results" style="display:none">
+      <div id="driftBanner" class="drift-banner"></div>
+      <div class="metrics-grid" id="driftMetrics"></div>
+
+      <div class="charts-row" id="driftTimelineRow">
+        <div class="chart-card">
+          <div class="chart-card-title">Drifted features per batch</div>
+          <div class="legend">
+            <span class="leg"><span class="leg-dot" style="background:var(--green)"></span>✓ Stable</span>
+            <span class="leg"><span class="leg-dot" style="background:var(--amber)"></span>▲ Moderate drift</span>
+            <span class="leg"><span class="leg-dot" style="background:var(--red)"></span>✕ Major drift</span>
+            <span class="leg"><span class="leg-dash"></span>Shift injected</span>
+          </div>
+          <div style="position:relative;height:220px"><canvas id="driftTimelineChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Mean predicted risk per batch</div>
+          <div class="legend">
+            <span class="leg"><span class="leg-line" style="background:var(--series-cur)"></span>Incoming batch</span>
+            <span class="leg"><span class="leg-dash"></span>Training reference</span>
+          </div>
+          <div style="position:relative;height:220px"><canvas id="driftRiskChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title" id="driftTableTitle">Per-feature tests — latest batch</div>
+          <table class="risk-table drift-table">
+            <thead>
+              <tr>
+                <th>Feature</th><th>Test</th><th>Statistic</th><th>p-value</th>
+                <th>PSI</th><th>Mean: ref → now</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="driftTableBody"></tbody>
+          </table>
+          <p class="drift-note" id="driftNote"></p>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title" id="driftDistTitle">Distribution</div>
+          <div class="legend">
+            <span class="leg"><span class="leg-dot" style="background:var(--series-ref)"></span>Reference (training)</span>
+            <span class="leg"><span class="leg-dot" style="background:var(--series-cur)"></span>Current batch</span>
+          </div>
+          <div style="position:relative;height:260px"><canvas id="driftDistChart"></canvas></div>
+          <p class="drift-note">Share of patients in each bin (%). Click a row in the table to compare another feature.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

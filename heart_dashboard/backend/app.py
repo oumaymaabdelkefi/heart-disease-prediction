@@ -11,6 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
+import drift
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -23,16 +24,18 @@ scaler = None
 df_global = None
 model_accuracy = None
 feature_importance = None
+reference_df = None   # training split (unscaled) — the distribution the model learned
 
 FEATURE_COLS = ["age","sex","cp","trestbps","chol","fbs","restecg","thalach","exang","oldpeak","slope","ca","thal"]
 TARGET_COL = "target"
 
 
 def train_model(df):
-    global model, scaler, model_accuracy, feature_importance
+    global model, scaler, model_accuracy, feature_importance, reference_df
     X = df[FEATURE_COLS]
     y = df[TARGET_COL]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    reference_df = X_train.assign(**{TARGET_COL: y_train}).reset_index(drop=True)
     scaler = StandardScaler()
     X_train_s = scaler.fit_transform(X_train)
     X_test_s  = scaler.transform(X_test)
@@ -159,6 +162,85 @@ def predict():
             "top_features": top_features,
             "no_disease_pct": round(float(proba[0])*100,1)
         })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ─── DRIFT MONITORING ───
+
+def _predict_risk(X):
+    return model.predict_proba(scaler.transform(X[FEATURE_COLS].values))[:, 1]
+
+
+@app.route("/api/drift/scenarios", methods=["GET"])
+def drift_scenarios():
+    return jsonify({"scenarios": [{"id": k, "label": v} for k, v in drift.SCENARIOS.items()]})
+
+
+@app.route("/api/drift/simulate", methods=["POST"])
+def drift_simulate():
+    """Simulate a stream of incoming batches with a gradual shift and test each one.
+
+    JSON body (all optional): scenario, intensity (0-1), batch_size, n_batches, onset, seed
+    """
+    if model is None:
+        return jsonify({"error": "No model trained. Upload a dataset first."}), 400
+    p = request.get_json() or {}
+    scenario = p.get("scenario", "aging")
+    if scenario not in drift.SCENARIOS:
+        return jsonify({"error": f"Unknown scenario '{scenario}'"}), 400
+    try:
+        intensity = min(max(float(p.get("intensity", 1.0)), 0.0), 1.0)
+        batch_size = min(max(int(p.get("batch_size", 150)), 30), 2000)
+        n_batches = min(max(int(p.get("n_batches", 12)), 2), 40)
+        onset = min(max(int(p.get("onset", 4)), 0), n_batches - 1)
+        seed = int(p.get("seed", 42))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid simulation parameters"}), 400
+
+    timeline, last = [], None
+    for i, k, batch in drift.simulate_stream(reference_df, scenario, intensity,
+                                             batch_size, n_batches, onset, seed):
+        report = drift.detect_drift(reference_df, batch, FEATURE_COLS, _predict_risk)
+        timeline.append({
+            "batch": i + 1,
+            "shift": k,
+            "n_drifted": report["n_drifted"],
+            "max_psi": report["max_psi"],
+            "overall": report["overall"],
+            "drifted_features": report["drifted_features"],
+            "mean_risk": report["prediction"]["cur_mean_risk"],
+        })
+        last = report
+
+    first_alert = next((t["batch"] for t in timeline if t["overall"] != "stable"), None)
+    return jsonify({
+        "scenario": scenario,
+        "scenario_label": drift.SCENARIOS[scenario],
+        "params": {"intensity": intensity, "batch_size": batch_size,
+                   "n_batches": n_batches, "onset": onset + 1},
+        "first_alert_batch": first_alert,
+        "timeline": timeline,
+        "latest": last,
+    })
+
+
+@app.route("/api/drift/check", methods=["POST"])
+def drift_check():
+    """Test a real incoming batch (CSV with the 13 feature columns) for drift."""
+    if model is None:
+        return jsonify({"error": "No model trained. Upload a dataset first."}), 400
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    try:
+        batch = pd.read_csv(io.StringIO(request.files["file"].read().decode("utf-8")))
+        missing = [c for c in FEATURE_COLS if c not in batch.columns]
+        if missing:
+            return jsonify({"error": f"Missing columns: {missing}"}), 400
+        batch = batch[FEATURE_COLS].dropna()
+        if len(batch) < 20:
+            return jsonify({"error": "Need at least 20 rows for a meaningful drift test"}), 400
+        return jsonify(drift.detect_drift(reference_df, batch, FEATURE_COLS, _predict_risk))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
