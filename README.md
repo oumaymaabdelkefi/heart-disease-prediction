@@ -2,9 +2,6 @@
 
 A classification study on the UCI Heart Disease dataset — a full-stack web dashboard that puts the analysis in front of a user: upload a dataset, explore it visually, and get a risk prediction for an individual patient.
 
-**Authors:** Noura Haddaoui, Oumayma Abdelkefi
-**Course:** Data Analytics — South Mediterranean University
-**Instructor:** Hamza Moharrar · April 2026
 
 > **Academic project.** This is not a medical device. Nothing it outputs should inform diagnosis or treatment.
 
